@@ -152,6 +152,10 @@ details li b{color:var(--bone)}
 .prof input[type=text]{width:100%;height:40px;border-radius:10px;border:1px solid var(--rule);background:#120a0b;color:var(--bone);padding:0 10px;font:inherit;font-weight:700}
 .prof .row2{display:flex;gap:6px;flex-wrap:wrap;font-size:12px;color:var(--dim)}
 .prof label.up{height:30px;padding:0 10px;border-radius:9px;border:1px solid var(--gold);color:var(--gold2);display:inline-flex;align-items:center;font-weight:800;font-size:12px;cursor:pointer}
+.prof button.up{height:30px;padding:0 10px;border-radius:9px;border:1px solid var(--gold);background:#2d1a10;color:var(--gold2);display:inline-flex;align-items:center;font-weight:800;font-size:12px;cursor:pointer}
+.prof #saveProf{background:linear-gradient(180deg,var(--gold2),var(--gold));color:#2a1505;border-color:var(--gold2)}
+.prof #saveProf:disabled{opacity:.6;cursor:wait}
+.prof #photoDel{background:#2d1a10;border-color:var(--gold);color:var(--gold2)}
 .picks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .pick{position:relative;background:radial-gradient(circle at 50% 70%,#2a1416,#140a0b);border:1px solid var(--rule);border-radius:12px;padding:6px 4px 7px;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
 .pick .ph{width:100%;aspect-ratio:.9;display:grid;place-items:end center}
@@ -441,7 +445,20 @@ const SHOP={
   dice:[{id:'klasik',n:'Klasik',p:0,face:'linear-gradient(145deg,#fbf1e2,#e2cdb8)',pip:'#8a1517'},{id:'emas',n:'Emas',p:400,face:'linear-gradient(145deg,#fff1b0,#d9a43a 60%,#8a5a12)',pip:'#3a2006'},{id:'es',n:'Es',p:600,face:'linear-gradient(145deg,#eaf8ff,#8fd0f0 60%,#3a7aa0)',pip:'#0a3a5a'},{id:'darah',n:'Darah',p:800,face:'linear-gradient(145deg,#8a1a1a,#3a0606)',pip:'#ffd36b'}],
   frame:[{id:'none',n:'Tanpa bingkai',p:0},{id:'emas',n:'Bingkai Emas',p:300},{id:'api',n:'Bingkai Api',p:600}]
 };
-const LEGEND_PRICE=5000,FREECARD_PRICE=100,ATTACK_COST=5,GIFT_COST=10,STAKE=20;
+const LEGEND_PRICE=5000,FREECARD_PRICE=100,ATTACK_COST=120,ATTACK2_COST=200,GIFT_COST=30,STAKE=20;
+// serangan (eff: freeze=lewat giliran, silence=bungkam serangan, home=bidak lawan pulang, push=mundur 2, shift=mundur 1, sweep=semua lawan mundur 1)
+const MOVES={
+  arvan:{atk:{n:'Badai Es',fx:'ice',eff:'freeze'},gift:{n:'Kristal Es',fx:'ice'}},
+  elvara:{atk:{n:'Akar Jerat',fx:'nature',eff:'freeze'},gift:{n:'Kecup Bunga Mawar',fx:'sakura'}},
+  mahesa:{atk:{n:'Sambaran Petir',fx:'lightning',eff:'home'},gift:{n:'Percikan Emas',fx:'sun'}},
+  ragnar:{atk:{n:'Hentakan Kaki Raksasa',fx:'earth',eff:'push'},gift:{n:'Tepuk Tanah',fx:'earth'}},
+  mikara:{atk:{n:'Tebasan Angin',fx:'nature',eff:'push'},gift:{n:'Pusaran Daun',fx:'nature'}},
+  kazra:{atk:{n:'Cakar Besi',fx:'shadow',eff:'freeze'},gift:{n:'Percikan Bara',fx:'phoenix'}},
+  zareth:{atk:{n:'Kutukan Bayangan',fx:'phoenix',eff:'silence'},gift:{n:'Asap Ungu',fx:'shadow'}},
+  gantara:{atk:{n:'Pukulan Tanah',fx:'sun',eff:'shift'},gift:{n:'Batu Kecil',fx:'earth'}},
+  aurelia:{atk:{n:'Cahaya Menyilaukan',fx:'water',eff:'freeze'},gift:{n:'Kelopak Cahaya',fx:'water'}},
+  naga:{atk:{n:'Napas Api',fx:'naga',eff:'home'},atk2:{n:'Ekor Naga',fx:'naga',eff:'sweep'},gift:{n:'Sisik Naga',fx:'naga'}}
+};
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const d6=()=>1+Math.floor(Math.random()*6);
 const pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -758,7 +775,7 @@ function addCoins(pl,n){
 }
 function transfer(from,to,n){if(!G||G.noCoins)return 0;const take=Math.min(n,coinsOf(from));if(take<=0)return 0;addCoins(from,-take);addCoins(to,take);return take;}
 function floatCoin(pl,n){const chip=document.querySelector(`.chip[data-seat="${pl.seat}"]`);if(!chip||!n)return;const f=document.createElement('div');f.className='floatc '+(n>0?'plus':'minus');f.textContent=(n>0?'+':'')+n;chip.appendChild(f);setTimeout(()=>f.remove(),1500);}
-function updateCoins(){document.getElementById('coinVal').textContent=ST.coins.toLocaleString('id-ID');}
+function updateCoins(){document.getElementById('coinVal').textContent=(typeof IS_OWNER!=='undefined'&&IS_OWNER)?'Penguasa Naga':ST.coins.toLocaleString('id-ID');}
 
 /* ================= alur permainan ================= */
 function log(m){G.log=m;}
@@ -785,7 +802,10 @@ function newGame(){
   setTimeout(()=>players.slice(1).forEach((b,i)=>setTimeout(()=>emotePop(b,'mengejek'),i*220)),900);
   startTurn();
 }
-function startTurn(){const pl=G.players[G.cur];pl.sixes=0;G.breathUsed=false;beginRoll(pl);}
+function startTurn(){const pl=G.players[G.cur];pl.sixes=0;G.breathUsed=false;
+  pl.silenced=!!pl.silenceNext;pl.silenceNext=false;
+  if(pl.frozenNext){pl.frozenNext=false;log(`${pl.uname} membeku, giliran dilewati.`);renderUI();setTimeout(()=>nextTurn(),1000);return;}
+  beginRoll(pl);}
 function beginRoll(pl){G.phase='roll';G.moves=[];G.busy=false;renderUI();placeTokens();if(pl.bot)botTurn(pl);else startTimer();}
 function startTimer(){G.deadline=Date.now()+15000;}
 async function nextTurn(){if(G.over)return;G.deadline=0;G.cur=(G.cur+1)%G.players.length;if(G.cur===0)G.round++;startTurn();}
@@ -961,10 +981,10 @@ async function nagaRage(){
 }
 
 /* ================= serangan dan hadiah ================= */
-function sendFx(from,toSeat,kind){
+function sendFx(from,toSeat,kind,elOv){
   const to=PSEAT(toSeat);const [x,y]=basePos(toSeat);
   if(kind==='attack'){
-    const el=CHARS[from.char].el;const [fx,fy]=basePos(from.seat);
+    const el=elOv||CHARS[from.char].el;const [fx,fy]=basePos(from.seat);
     for(let i=0;i<10;i++)setTimeout(()=>FX.add({type:'flame',x:fx+(x-fx)*i/10,y:fy+(y-fy)*i/10,size:6,col:ELEM[el].c,dec:.05}),i*30);
     setTimeout(()=>{if(hasLegend(from)&&from.seat===0)legendary(from.char,ELEM[el].n.toUpperCase()+'!');else{burst(el,x,y,1.8);elemSound(el);shake();}setMood(to,'kesakitan',true,true);emotePop(to,'kesakitan');},330);
     if(to.bot&&Math.random()<.5)setTimeout(()=>botSend(to,from.seat,Math.random()<.7?'attack':'emote'),2200);
@@ -973,14 +993,41 @@ function sendFx(from,toSeat,kind){
     burst('sun',x,y,.8);sfx('gift');setMood(to,'senang',true,true);emotePop(to,'senang','Terima kasih!');
   }
 }
+function canApply(eff,from,to){
+  if(eff==='freeze'||eff==='silence')return true;
+  if(eff==='sweep')return G.players.some(q=>q!==from&&q.tokens.some(t=>t.p>=1&&t.p<=50&&!SAFE.has(idxOf(q,t.p))));
+  return to.tokens.some(t=>t.p>=1&&t.p<=50&&!SAFE.has(idxOf(to,t.p)));
+}
+function applyEffect(from,to,mv){
+  const a=from.uname,b=to.uname;
+  if(mv.eff==='freeze'){to.frozenNext=true;log(`${a} memakai ${mv.n}! ${b} lewat giliran berikutnya.`);}
+  else if(mv.eff==='silence'){to.silenceNext=true;log(`${a} memakai ${mv.n}! ${b} tidak bisa menyerang giliran berikutnya.`);}
+  else if(mv.eff==='home'){
+    const c=[];to.tokens.forEach(t=>{if(t.p>=1&&t.p<=50&&!SAFE.has(idxOf(to,t.p)))c.push(t);});
+    if(!c.length)return;c.sort((x,y)=>y.p-x.p)[0].p=-1;
+    log(`${a} memakai ${mv.n}! Bidak ${b} kembali ke kandang.`);
+  }
+  else{
+    const steps=mv.eff==='push'?2:1;
+    const victims=mv.eff==='sweep'?G.players.filter(q=>q!==from):[to];
+    victims.forEach(q=>q.tokens.forEach(t=>{if(t.p>=1&&t.p<=50)t.p=Math.max(1,t.p-steps);}));
+    log(`${a} memakai ${mv.n}! ${mv.eff==='sweep'?'Semua lawan':b} terdorong mundur.`);
+  }
+  setMood(to,'kesakitan',true,true);placeTokens();renderUI();
+}
 function playerSend(toSeat,kind){
-  const me=G.players[G.cur];const cost=kind==='attack'?ATTACK_COST:GIFT_COST;const t=Date.now();
+  const me=G.players[G.cur];const t=Date.now();const to=PSEAT(toSeat);
+  const mv=kind==='gift'?MOVES[me.char].gift:(kind==='attack2'?MOVES[me.char].atk2:MOVES[me.char].atk);
+  if(!mv){toast('Karakter ini belum punya serangan');return;}
+  const cost=kind==='gift'?GIFT_COST:(kind==='attack2'?ATTACK2_COST:ATTACK_COST);
+  if(kind!=='gift'&&me.silenced){toast('Seranganmu dibungkam giliran ini');return;}
   if(t-me.lastSend<10000){toast(`Tunggu ${Math.ceil((10000-(t-me.lastSend))/1000)} detik lagi`);return;}
-  if(coinsOf(me)<cost){toast('Koin tidak cukup');return;}
-  me.lastSend=t;addCoins(me,-cost);
-  if(kind==='gift')PSEAT(toSeat).coins+=cost;
-  closeSheet();sendFx(me,toSeat,kind);
-  log(kind==='attack'?`Kamu menyerang kandang ${PSEAT(toSeat).uname}!`:`Kamu memberi hadiah ke ${PSEAT(toSeat).uname}.`);renderUI();
+  if(!me.owner&&coinsOf(me)<cost){toast('Koin tidak cukup');return;}
+  if(kind!=='gift'&&!canApply(mv.eff,me,to)){toast('Tidak ada bidak lawan yang bisa kena efek ini');return;}
+  me.lastSend=t;if(!me.owner)addCoins(me,-cost);
+  if(kind==='gift'){to.coins+=cost;closeSheet();sendFx(me,toSeat,'gift');log(`Kamu memberi ${mv.n} ke ${to.uname}.`);}
+  else{closeSheet();sendFx(me,toSeat,'attack',mv.fx);applyEffect(me,to,mv);}
+  renderUI();
 }
 function botSend(b,toSeat,kind){
   if(!G||G.over)return;
@@ -1034,7 +1081,7 @@ function renderUI(){
   document.getElementById('ownerSlot').innerHTML=me.owner?`<div class="ownerbar"><div style="flex:1"><b>Mode Pemilik</b><br><span style="color:var(--dim);font-size:12px">${G.ownerMode?'Aktif: atur dadu, kebal, Amukan Naga. Pertandingan ini tanpa koin.':'Mati: Naga Swara main normal.'}</span></div><button class="sw" id="godSw" aria-pressed="${G.ownerMode}" aria-label="Mode Pemilik"><i></i></button></div>`:'';
   document.getElementById('strip').innerHTML=G.players.map(pl=>{const m=moodOf(pl);
     return `<div class="chip${pl===cur&&!G.over?' now':''}" data-seat="${pl.seat}">${m!=='tenang'&&pl.line?`<div class="bubble">${esc(pl.line)}</div>`:''}<div class="avw">${avatarHTML(pl,m)}<span class="mini" style="border-color:${pl.color}"><img src="${face(pl.char,m)}" alt=""></span></div>
-      <div class="nm">${esc(pl.uname)}</div><div class="st">Rumah ${doneCount(pl)}/${G.n} · ${coinsOf(pl)}</div>${godOn(pl)?'<span class="bdg">DEWA</span>':''}</div>`;}).join('');
+      <div class="nm">${esc(pl.uname)}</div><div class="st">Rumah ${doneCount(pl)}/${G.n} · ${pl.owner?'Penguasa Naga':coinsOf(pl)}</div>${godOn(pl)?'<span class="bdg">DEWA</span>':''}</div>`;}).join('');
   const myTurn=!G.players[G.cur].bot&&!G.over;const canRoll=myTurn&&G.phase==='roll'&&!G.busy;
   let title,hint;
   if(G.over){title='Selesai';hint='';}
@@ -1057,12 +1104,13 @@ function renderUI(){
 
 /* ================= kirim (serangan / hadiah) ================= */
 function openSend(seat){
-  if(!G||G.over)return;if(seat)G.targetSeat=seat;const me=G.players[G.cur];const el=ELEM[CHARS[me.char].el];
+  if(!G||G.over)return;if(seat)G.targetSeat=seat;const me=G.players[G.cur];const mv=MOVES[me.char];
+  const atk2=mv.atk2?`<button class="act atk" id="doAtk2">${esc(mv.atk2.n)}<small>${ATTACK2_COST} koin</small></button>`:'';
   document.getElementById('sheetSlot').innerHTML=`<div class="sheet" role="dialog" aria-label="Kirim ke pemain"><div class="in">
     <div style="display:flex;justify-content:space-between;align-items:center"><h3 style="font-size:18px">Kirim ke kandang</h3><button class="ib" id="closeSheet" aria-label="Tutup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="targets">${G.players.slice(1).map(p=>`<button class="tgt${p.seat===G.targetSeat?' sel':''}" data-tgt="${p.seat}">${avatarHTML(p,'tenang')}${esc(p.uname)}</button>`).join('')}</div>
-    <div class="acts"><button class="act atk" id="doAtk">Serang dengan ${el.n}<small>${ATTACK_COST} koin</small></button><button class="act gift" id="doGift">Beri hadiah<small>${GIFT_COST} koin, untuk dia</small></button></div>
-    <div class="note">Hanya efek, bidak tidak bergeser. Jeda 10 detik antar kiriman.</div></div></div>`;
+    <div class="acts"><button class="act atk" id="doAtk">${esc(mv.atk.n)}<small>${ATTACK_COST} koin</small></button>${atk2}<button class="act gift" id="doGift">${esc(mv.gift.n)}<small>${GIFT_COST} koin, untuk dia</small></button></div>
+    <div class="note">Efek langsung ke lawan. Jeda 10 detik antar kiriman.</div></div></div>`;
 }
 function closeSheet(){document.getElementById('sheetSlot').innerHTML='';}
 
@@ -1076,6 +1124,7 @@ document.addEventListener('click',e=>{
   if(!G)return;unlockAudio();const me=G.players[0];const cur=G.players[G.cur];
   const tg=q('[data-tgt]');if(tg){openSend(+tg.dataset.tgt);return;}
   if(q('#doAtk')){playerSend(G.targetSeat,'attack');return;}
+  if(q('#doAtk2')){playerSend(G.targetSeat,'attack2');return;}
   if(q('#doGift')){playerSend(G.targetSeat,'gift');return;}
   if(q('#sendOpen')){openSend();return;}
   const chip=q('.chip');if(chip&&+chip.dataset.seat>0&&!G.over){openSend(+chip.dataset.seat);return;}
@@ -1098,7 +1147,7 @@ function showPick(){
   ov.innerHTML=`<div class="ovin"><div class="hero"><h1>SWARA LUDO</h1><p>ROLL · LAUGH · BETRAY · REPEAT</p></div>
     <div class="prof"><button class="photo" id="photoBtn" aria-label="Ganti foto profil">${ST.photo?`<img src="${ST.photo}" alt="">`:esc((ST.username||'?').slice(0,2).toUpperCase())}</button>
       <div class="fields"><input id="uname" type="text" maxlength="18" placeholder="Username kamu" value="${esc(ST.username)}" aria-label="Username">
-      <div class="row2"><label class="up" for="photoIn">Pilih foto</label><input id="photoIn" type="file" accept="image/*" hidden>${ST.photo?'<button class="up" id="photoDel" style="background:none">Hapus foto</button>':''}<button class="up" id="saveProf">Simpan ke akun</button><span style="align-self:center">Menang ${ST.wins} · beruntun ${ST.streak}</span></div></div>
+      <div class="row2"><label class="up" for="photoIn">Pilih foto</label><input id="photoIn" type="file" accept="image/*" hidden>${ST.photo?'<button class="up" id="photoDel">Hapus foto</button>':''}<button class="up" id="saveProf">Simpan ke akun</button><span style="align-self:center">Menang ${ST.wins} · beruntun ${ST.streak}</span></div></div>
       <div class="coins"><span class="coin">S</span>${ST.coins.toLocaleString('id-ID')}</div></div>
     <div class="lbl">PILIH BIDAK</div>
     <div class="picks">${ORDER.map(k=>{const ch=CHARS[k];const lockedOwner=ch.owner&&!IS_OWNER;const lockedBuy=!ch.owner&&!owns(k);
