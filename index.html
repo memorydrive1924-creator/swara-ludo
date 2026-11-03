@@ -119,7 +119,7 @@ img{display:block}
 @keyframes breathe{50%{box-shadow:0 0 34px #e3b45a}}
 .cube{width:46px;height:46px;position:relative;transform-style:preserve-3d;transition:transform 1s cubic-bezier(.15,.85,.25,1)}
 .face{position:absolute;inset:0;border-radius:9px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:7px;backface-visibility:hidden;background:var(--dface,linear-gradient(145deg,#fbf1e2,#e2cdb8));box-shadow:inset 0 0 8px #0004}
-.face i{width:8px;height:8px;border-radius:50%;background:var(--dpip,#8a1517);place-self:center;box-shadow:inset 0 1px 2px #0008}/* dadu datar ala Ludo King */.cube{transform-style:flat!important;transition:transform .7s cubic-bezier(.2,.8,.25,1)}.pc,.pc *,.pc img{filter:none!important;box-shadow:none!important;text-shadow:none!important}.cube .face{transform:none!important;opacity:0;backface-visibility:visible;box-shadow:none!important;border:1px solid #d9d2c7;transition:opacity .05s}.cube:not([data-v]) .f1,.cube[data-v="1"] .f1,.cube[data-v="2"] .f2,.cube[data-v="3"] .f3,.cube[data-v="4"] .f4,.cube[data-v="5"] .f5,.cube[data-v="6"] .f6{opacity:1}.cube .face i{box-shadow:none!important}
+.face i{width:8px;height:8px;border-radius:50%;background:var(--dpip,#8a1517);place-self:center;box-shadow:inset 0 1px 2px #0008}/* dadu datar ala Ludo King */.cube{transform-style:flat!important;transition:transform .7s cubic-bezier(.2,.8,.25,1)}.pc,.pc *,.pc img{filter:none!important;box-shadow:none!important;text-shadow:none!important}@keyframes dspin{to{transform:rotate(360deg)}}.cube.rolling{animation:dspin .7s cubic-bezier(.2,.8,.25,1)}.cube .face{transform:none!important;opacity:0;backface-visibility:visible;box-shadow:none!important;border:1px solid #d9d2c7;transition:opacity .05s}.cube:not([data-v]) .f1,.cube[data-v="1"] .f1,.cube[data-v="2"] .f2,.cube[data-v="3"] .f3,.cube[data-v="4"] .f4,.cube[data-v="5"] .f5,.cube[data-v="6"] .f6{opacity:1}.cube .face i{box-shadow:none!important}
 .f1{transform:translateZ(23px)}.f2{transform:rotateY(90deg) translateZ(23px)}.f3{transform:rotateY(180deg) translateZ(23px)}
 .f4{transform:rotateY(-90deg) translateZ(23px)}.f5{transform:rotateX(90deg) translateZ(23px)}.f6{transform:rotateX(-90deg) translateZ(23px)}
 .rinfo{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
@@ -300,11 +300,11 @@ body.cine #fx{z-index:13}
     <summary>Aturan dan koin</summary>
     <ul>
       <li><b>Tujuan:</b> bawa semua bidakmu keliling papan dan masuk rumah di tengah lebih dulu.</li>
-      <li><b>Keluar kandang</b> butuh 6. <b>Dapat 6, menginjak lawan, atau masuk rumah:</b> lempar lagi. Tiga kali 6 berturut-turut: giliran hangus.</li>
-      <li><b>Menginjak:</b> mendarat di kotak lawan mengirimnya ke kandang. Kotak ★ dan kotak awal aman.</li>
+      <li><b>Keluar arena</b> butuh 6. <b>Dapat 6, menginjak lawan, atau masuk rumah:</b> lempar lagi. Tiga kali 6 berturut-turut: giliran hangus.</li>
+      <li><b>Menginjak:</b> mendarat di kotak lawan mengirimnya ke arena. Kotak ★ dan kotak awal aman.</li>
       <li><b>Koin:</b> tiap bidakmu masuk rumah, kamu dapat 10 dari setiap lawan. Menginjak lawan +5 dari yang diinjak. Juara 1 dapat taruhan dan bonus 30.</li>
       <li><b>Giliran</b> 15 detik. Lewat waktu, dadu dilempar otomatis.</li>
-      <li><b>Serangan dan hadiah</b> ke kandang lawan hanya efek, tidak menggeser bidak.</li>
+      <li><b>Serangan dan hadiah</b> ke arena lawan hanya efek, tidak menggeser bidak.</li>
       <li><b>Naga Swara</b> karakter spesial.</li>
     </ul>
   </details>
@@ -460,7 +460,7 @@ const MOODS=['senang','tertawa','mengejek','kaget','marah','sedih','kesakitan'];
 const MLABEL={senang:'Senang',tertawa:'Ngakak',mengejek:'Ejek',kaget:'Kaget',marah:'Marah',sedih:'Sedih',kesakitan:'Aduh'};
 const LINES={senang:['Yes!','Mantap!','Asik!'],tertawa:['Hahaha!','Wkwkwk!','Hahaha, kena kau!'],mengejek:['Kasihan deh!','Payah!','Weee!'],kaget:['Hah?!','Lho?!','Astaga!'],marah:['Awas kamu!','Grrr!','Kurang ajar!'],sedih:['Yaah…','Huhuhu…','Bidakku…'],kesakitan:['Aduh!','Adaww!','Aw, sakit!']};
 const DARES=['Nyanyi 10 detik di voice chat','Puji pemenang 3 kali','Bicara pakai logat daerah sampai game berikutnya','Tirukan suara hewan bidakmu','Bilang "Kamu memang hebat" ke pemenang','Ceritakan pengalaman paling memalukan','Pakai foto profil lucu selama 1 jam','Biarkan pemenang memilih karaktermu di game berikutnya'];
-const BOTNAMES=['ratu_dadu','si_raja_ludo','kuda_liar77','dewi_bidak','panglima_enam','tukang_injak','mbak_hoki','bang_santuy','putri_kandang','jagoan_rumah'];
+const BOTNAMES=['ratu_dadu','si_raja_ludo','kuda_liar77','dewi_bidak','panglima_enam','tukang_injak','mbak_hoki','bang_santuy','putri_arena','jagoan_rumah'];
 const SHOP={
   dice:[{id:'klasik',n:'Klasik',p:0,face:'#ffffff',pip:'#111111'},{id:'emas',n:'Emas',p:400,face:'linear-gradient(145deg,#fff1b0,#d9a43a 60%,#8a5a12)',pip:'#3a2006'},{id:'es',n:'Es',p:600,face:'linear-gradient(145deg,#eaf8ff,#8fd0f0 60%,#3a7aa0)',pip:'#0a3a5a'},{id:'darah',n:'Darah',p:800,face:'linear-gradient(145deg,#8a1a1a,#3a0606)',pip:'#ffd36b'}],
   frame:[{id:'none',n:'Tanpa bingkai',p:0},{id:'emas',n:'Bingkai Emas',p:300},{id:'api',n:'Bingkai Api',p:600}]
@@ -800,7 +800,7 @@ function speakLine(text,pitch){
     const v=speechSynthesis.getVoices().find(x=>/^id/i.test(x.lang));if(v)u.voice=v;
     speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}
 }
-const CAPT={"arvan": ["Dingin, kan? Ini hadiahku!", "Kubekukan kau di sini!", "Badai es menyapu jalanmu!", "Dingin begini, kau tak akan bisa bangkit!", "Kau sudah jadi patung es!", "Terinjak dalam salju!"], "elvara": ["Akar hutan menjeratmu!", "Alam tidak lupa membalas!", "Hutan ini tak akan memaafkanmu!", "Bunga hutan menyambutmu pulang!", "Kau tersesat di hutanku!", "Pohon tua tidak pernah lupa!"], "mahesa": ["Sambaran emas! Kena kau!", "Petir tak pernah salah sasaran!", "Pulang sana, kau kalah!", "Taring emas menggigit!", "Kilat menyambarmu, pulang!", "Harimau emas tidak pernah lengah!"], "ragnar": ["Hantam! Kau terinjak!", "Gempa membuatmu terpental!", "Kaki raksasaku tidak pernah ragu!", "Tanah bergetar untukmu!", "Injak! Injak! Pulang!", "Bersiaplah terpental!"], "mikara": ["Tebasan angin! Kena!", "Roh rubah menyeretmu pulang!", "Ekorku baru saja mengejarmu!", "Angin menyapumu keluar!", "Daun sakura jatuh di atasmu!", "Rubah tak pernah lengah!"], "kazra": ["Dari bayangan aku datang!", "Kena cakar besi!", "Pemburu sudah menerkam!", "Tak ada yang lari dari bayangan!", "Cakarku sudah mengenaimu!", "Sunyi sebelum kau terinjak!"], "zareth": ["Kutukan bayangan menyambarmu!", "Api ungu melahapmu!", "Terbanglah kembali ke kandang!", "Burung ungu menukik!", "Api phoenix belum padam!", "Kau kembali ke awal!"], "gantara": ["Pukulan tanah! Kena!", "Langit menurunkan hukumanku!", "Kau tergeser dari jalanmu!", "Angin dari langit menurunkanmu!", "Hukum surya, pulang kau!", "Tanah pun ikut menghantammu!"], "aurelia": ["Cahaya menyilaukan! Kena!", "Air kristal menghapus jejakmu!", "Ramalanku menjatuhkanmu!", "Mata air membawamu pergi!", "Kristal dingin menusukmu!", "Ramalan tak pernah salah, kau kalah!"], "naga": ["Napas api! Kau hangus!", "Ekor naga menyapu jalanmu!", "Sisik naga tak mudah dikalahkan!", "Api naga tak pernah padam!", "Sisik emas menyapumu!", "Naga tidak mengampuni!"]};
+const CAPT={"arvan": ["Dingin, kan? Ini hadiahku!", "Kubekukan kau di sini!", "Badai es menyapu jalanmu!", "Dingin begini, kau tak akan bisa bangkit!", "Kau sudah jadi patung es!", "Terinjak dalam salju!"], "elvara": ["Akar hutan menjeratmu!", "Alam tidak lupa membalas!", "Hutan ini tak akan memaafkanmu!", "Bunga hutan menyambutmu pulang!", "Kau tersesat di hutanku!", "Pohon tua tidak pernah lupa!"], "mahesa": ["Sambaran emas! Kena kau!", "Petir tak pernah salah sasaran!", "Pulang sana, kau kalah!", "Taring emas menggigit!", "Kilat menyambarmu, pulang!", "Harimau emas tidak pernah lengah!"], "ragnar": ["Hantam! Kau terinjak!", "Gempa membuatmu terpental!", "Kaki raksasaku tidak pernah ragu!", "Tanah bergetar untukmu!", "Injak! Injak! Pulang!", "Bersiaplah terpental!"], "mikara": ["Tebasan angin! Kena!", "Roh rubah menyeretmu pulang!", "Ekorku baru saja mengejarmu!", "Angin menyapumu keluar!", "Daun sakura jatuh di atasmu!", "Rubah tak pernah lengah!"], "kazra": ["Dari bayangan aku datang!", "Kena cakar besi!", "Pemburu sudah menerkam!", "Tak ada yang lari dari bayangan!", "Cakarku sudah mengenaimu!", "Sunyi sebelum kau terinjak!"], "zareth": ["Kutukan bayangan menyambarmu!", "Api ungu melahapmu!", "Terbanglah kembali ke arena!", "Burung ungu menukik!", "Api phoenix belum padam!", "Kau kembali ke awal!"], "gantara": ["Pukulan tanah! Kena!", "Langit menurunkan hukumanku!", "Kau tergeser dari jalanmu!", "Angin dari langit menurunkanmu!", "Hukum surya, pulang kau!", "Tanah pun ikut menghantammu!"], "aurelia": ["Cahaya menyilaukan! Kena!", "Air kristal menghapus jejakmu!", "Ramalanku menjatuhkanmu!", "Mata air membawamu pergi!", "Kristal dingin menusukmu!", "Ramalan tak pernah salah, kau kalah!"], "naga": ["Napas api! Kau hangus!", "Ekor naga menyapu jalanmu!", "Sisik naga tak mudah dikalahkan!", "Api naga tak pernah padam!", "Sisik emas menyapumu!", "Naga tidak mengampuni!"]};
 const VICT={"arvan": ["Badai salju menyapu semuanya, aku menang!", "Serigala es pulang dengan kemenangan!", "Dingin begini, kalian semua kalah!", "Salju turun untuk merayakan kemenanganku!", "Aku sampai di rumah lebih dulu, bersih!", "Lolongan kemenangan untuk serigala es!"], "elvara": ["Hutan menyambut kemenanganku!", "Alam memberkatiku, aku pulang sebagai juara!", "Daun-daun bersorak untukku!", "Akar bumi menjadi saksi kemenanganku!", "Rusa hutan kembali ke rumah sebagai juara!", "Kemenangan ini berkat hutan yang sabar!"], "mahesa": ["Petir emas menyambar, aku juara!", "Taring emas tak pernah kalah!", "Harimau emas mengaum untuk kemenangan!", "Kalian tak bisa mengejar kilat emas!", "Sambaran terakhir, dan aku pemenangnya!", "Emas ini milikku, juara!"], "ragnar": ["Gempa kemenangan, aku pemenangnya!", "Tanah bergetar untuk juara!", "Babi liar pulang dengan kemenangan!", "Kalian terinjak, aku menang!", "Kekuatanku membuktikan kemenangan!", "Hantam, dan juara ada di tanganku!"], "mikara": ["Sakura gugur untuk juara!", "Roh rubah tersenyum, aku pemenangnya!", "Ekor rubah membawaku pulang sebagai juara!", "Angin musim semi membawa kemenanganku!", "Rubah tak pernah kalah, pulang sebagai juara!", "Kelopak sakura menari untuk kemenanganku!"], "kazra": ["Dari bayangan, aku pulang sebagai juara!", "Pemburu selalu menang di akhir!", "Senyap dan menang, itu caraku!", "Gelap ini memberiku kemenangan!", "Tak ada yang bisa mengejar bayangan!", "Panther pulang dengan mangsa dan kemenangan!"], "zareth": ["Phoenix bangkit, aku juara!", "Api ungu membara untuk kemenanganku!", "Sayapku membawaku pulang sebagai juara!", "Kalian tertinggal di belakang bara!", "Kemenangan dari abu, itu milikku!", "Phoenix tak pernah kalah!"], "gantara": ["Langit menjadi saksi kemenanganku!", "Elang pulang dengan kemenangan!", "Matahari bersinar untuk juara!", "Dari atas langit, aku menang!", "Kemenangan ini milik langit!", "Sinar surya menyambut juara!"], "aurelia": ["Air kristal mengalir untuk juara!", "Ramalanku benar, aku pemenangnya!", "Mata air keberuntungan menutup pertandingan!", "Kristal bersinar untuk kemenanganku!", "Aku menang, sesuai ramalan!", "Air jernih, kemenangan pun jernih!"], "naga": ["Naga Swara pulang sebagai juara!", "Api naga menyala untuk kemenanganku!", "Sisik naga tak tertembus, aku menang!", "Keberuntungan sang naga, juara!", "Kalian semua tunduk pada juara!", "Naga Swara tersenyum, aku juara!"]};
 function victorySay(k){const c=CHARS[k];if(!c||!VICT[k])return;speakLine(pick(VICT[k]),c.pitch);}
 function captureSay(k){
@@ -861,7 +861,7 @@ function newGame(){
   document.getElementById('ov').hidden=true;closeSheet();
   buildBoard();placeTokens();
   {const gsx=GREET[Math.floor(Math.random()*GREET.length)];toast(gsx);speakLine(gsx,.85);}
-  log('Lempar dadu. Butuh 6 untuk keluar kandang.');
+  log('Lempar dadu. Butuh 6 untuk keluar arena.');
   if(players[0].owner)setTimeout(()=>legendary('naga','NAGA SWARA'),400);else{animalCry(CHARS[me].animal);setTimeout(()=>{const [x,y]=basePos(0);burst(CHARS[me].el,x,y,1.2);elemSound(CHARS[me].el);},300);}
   setTimeout(()=>players.slice(1).forEach((b,i)=>setTimeout(()=>emotePop(b,'mengejek'),i*220)),900);
   startTurn();
@@ -876,7 +876,7 @@ async function nextTurn(){if(G.over)return;G.deadline=0;G.cur=(G.cur+1)%G.player
   if(ONLINE){G.phase='wait';renderUI();placeTokens();await pushOnline(G.players[G.cur].uid);return;}
   startTurn();}
 function legal(pl,v){const m=[];pl.tokens.forEach((t,ti)=>{if(t.p<0){if(v===6)m.push({ti,to:0,out:true});}else if(t.p<FINAL&&t.p+v<=FINAL)m.push({ti,to:t.p+v});});return m;}
-function spinDie(v){sfx('dice');G.spin++;const cube=document.getElementById('cube');if(cube){cube.style.transform=`rotate(${G.spin*360}deg) scale(${G.spin%2?1.12:1})`;cube.dataset.v=v;}}
+function spinDie(v){sfx('dice');G.spin++;const cube=document.getElementById('cube');if(cube){cube.dataset.v=v;cube.classList.remove('rolling');void cube.offsetWidth;cube.classList.add('rolling');setTimeout(()=>{const c=document.getElementById('cube');if(c)c.classList.remove('rolling');},800);}}
 async function roll(pl,forced){
   if(G.busy||G.phase!=='roll'||G.over)return;
   G.busy=true;G.phase='rolling';G.deadline=0;renderUI();
@@ -899,7 +899,7 @@ async function move(pl,mv){
   if(!mv||G.phase!=='choose')return;
   G.busy=true;G.phase='moving';G.moves=[];G.deadline=0;renderUI();
   const t=pl.tokens[mv.ti];const el=document.getElementById(`pc${pl.seat}_${mv.ti}`);const el2=CHARS[pl.char].el;
-  if(mv.out){t.p=0;placeTokens();await sleep(60);const [x,y]=pcPos(pl,mv.ti);burst(el2,x,y,1);elemSound(el2);animalCry(CHARS[pl.char].animal);log(`${pl.uname} keluar kandang!`);await sleep(450);}
+  if(mv.out){t.p=0;placeTokens();await sleep(60);const [x,y]=pcPos(pl,mv.ti);burst(el2,x,y,1);elemSound(el2);animalCry(CHARS[pl.char].animal);log(`${pl.uname} keluar arena!`);await sleep(450);}
   else{while(t.p<mv.to){t.p++;sfx('step');placeTokens();if(el){el.classList.remove('hop');void el.offsetWidth;el.classList.add('hop');}await sleep(90);const [x,y]=pcPos(pl,mv.ti);trail(el2,x,y);await sleep(85);}}
   let extra=G.lastRoll===6,captured=false;
   if(t.p===FINAL){
@@ -1074,7 +1074,7 @@ function applyEffect(from,to,mv){
   else if(mv.eff==='home'){
     const c=[];to.tokens.forEach(t=>{if(t.p>=1&&t.p<=50&&!SAFE.has(idxOf(to,t.p)))c.push(t);});
     if(!c.length)return;c.sort((x,y)=>y.p-x.p)[0].p=-1;
-    log(`${a} memakai ${mv.n}! Bidak ${b} kembali ke kandang.`);
+    log(`${a} memakai ${mv.n}! Bidak ${b} kembali ke arena.`);
   }
   else{
     const steps=mv.eff==='push'?2:1;
@@ -1102,7 +1102,7 @@ function playerSend(toSeat,kind){
 function botSend(b,toSeat,kind){
   if(!G||G.over)return;
   if(kind==='emote'){const m=pick(['mengejek','tertawa','marah']);setMood(b,m,true);emotePop(b,m,b.line);return;}
-  sendFx(b,toSeat,'attack');log(`${b.uname} menyerang kandangmu dengan ${ELEM[CHARS[b.char].el].n}!`);renderUI();
+  sendFx(b,toSeat,'attack');log(`${b.uname} menyerang arenamu dengan ${ELEM[CHARS[b.char].el].n}!`);renderUI();
 }
 
 /* ================= bot ================= */
@@ -1129,7 +1129,7 @@ function botReact(mood){
 }
 setInterval(()=>{
   if(!G||G.over||G.players[G.cur].bot||!G.deadline)return;
-  const left=G.deadline-Date.now();const db=document.getElementById('rollBtn');if(db)db.style.setProperty('--t',Math.max(0,left/150));
+  const left=G.deadline-Date.now();const db=document.getElementById('rollBtn');const myT=ONLINE?G.players[G.cur].me:!G.players[G.cur].bot;if(db)db.style.setProperty('--t',myT?Math.max(0,left/150):0);
   if(left<=0){G.deadline=0;const me=G.players[G.cur];
     if(G.phase==='roll'&&!G.busy){toast('Waktu habis, dadu dilempar otomatis');roll(me);}
     else if(G.phase==='choose'&&!G.busy){toast('Waktu habis, bidak jalan otomatis');move(me,botPick(me));}}
@@ -1163,14 +1163,14 @@ function renderUI(){
   const dk=SHOP.dice.find(d=>d.id===ST.dice)||SHOP.dice[0];
   const old=document.getElementById('cube');const keep=old?old.style.transform:'';
   document.getElementById('panel').innerHTML=`
-    <div class="rollrow"><button class="dicebtn${canRoll?' ready':''}" id="rollBtn" ${canRoll?'':'disabled'} aria-label="Lempar dadu"><span class="in"><span class="cube" id="cube"${G.dieVal?` data-v="${G.dieVal}"`:''} style="--dface:${dk.face};--dpip:${dk.pip};transform:rotate(${(G.spin||0)*360}deg)">${[1,2,3,4,5,6].map(n=>`<span class="face f${n}">${pips(n)}</span>`).join('')}</span></span></button>
+    <div class="rollrow"><button class="dicebtn${canRoll?' ready':''}" id="rollBtn" ${canRoll?'':'disabled'} aria-label="Lempar dadu"><span class="in"><span class="cube" id="cube"${G.dieVal?` data-v="${G.dieVal}"`:''} style="--dface:${dk.face};--dpip:${dk.pip}">${[1,2,3,4,5,6].map(n=>`<span class="face f${n}">${pips(n)}</span>`).join('')}</span></span></button>
       <div class="rinfo"><div class="t">${esc(title)}</div><div class="h">${esc(hint)}</div><div class="lg">${esc(G.log)}</div></div>
       <button class="sendbtn" id="sendOpen" ${G.over?'disabled':''}>Kirim</button></div>
     ${G.ownerMode&&myTurn&&G.phase==='roll'?`<div class="lbl">ATUR DADU</div><div class="godrow">${[1,2,3,4,5,6].map(n=>`<button data-force="${n}" ${G.busy?'disabled':''} aria-label="Dadu ${n}">${n}</button>`).join('')}</div>
       <button class="godbtn" id="rage" ${G.busy||G.breathUsed?'disabled':''}>${G.breathUsed?'Amukan Naga sudah dipakai giliran ini':'AMUKAN NAGA: bakar bidak terdepan lawan'}</button>`:''}
     <div class="emotes">${MOODS.map(m=>`<button class="emo" data-emo="${m}" aria-label="${MLABEL[m]}"><span class="f" style="border-color:${me.color}"><img src="${face(me.char,m)}" alt=""></span>${MLABEL[m]}</button>`).join('')}</div>`;
   if(keep){const c=document.getElementById('cube');c.style.transition='none';c.style.transform=keep;void c.offsetWidth;c.style.transition='';}
-  const db=document.getElementById('rollBtn');if(db&&G.deadline)db.style.setProperty('--t',Math.max(0,(G.deadline-Date.now())/150));
+  const db=document.getElementById('rollBtn');if(db)db.style.setProperty('--t',(canRoll&&G.deadline)?Math.max(0,(G.deadline-Date.now())/150):0);
 }
 
 /* ================= kirim (serangan / hadiah) ================= */
@@ -1178,7 +1178,7 @@ function openSend(seat){
   if(!G||G.over)return;if(seat)G.targetSeat=seat;const me=ONLINE?meP():G.players[G.cur];const mv=MOVES[me.char];
   const atk2=mv.atk2?`<button class="act atk" id="doAtk2">${esc(mv.atk2.n)}<small>${ATTACK2_COST} koin</small></button>`:'';
   document.getElementById('sheetSlot').innerHTML=`<div class="sheet" role="dialog" aria-label="Kirim ke pemain"><div class="in">
-    <div style="display:flex;justify-content:space-between;align-items:center"><h3 style="font-size:18px">Kirim ke kandang</h3><button class="ib" id="closeSheet" aria-label="Tutup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div style="display:flex;justify-content:space-between;align-items:center"><h3 style="font-size:18px">Kirim ke arena</h3><button class="ib" id="closeSheet" aria-label="Tutup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="targets">${G.players.filter(p=>!p.me).map(p=>`<button class="tgt${p.seat===G.targetSeat?' sel':''}" data-tgt="${p.seat}">${avatarHTML(p,'tenang')}${esc(p.uname)}</button>`).join('')}</div>
     <div class="acts"><button class="act atk" id="doAtk">${esc(mv.atk.n)}<small>${ATTACK_COST} koin</small></button>${atk2}<button class="act gift" id="doGift">${esc(mv.gift.n)}<small>${GIFT_COST} koin, untuk dia</small></button></div>
     <div class="note">Efek langsung ke lawan. Jeda 10 detik antar kiriman.</div></div></div>`;
@@ -1223,7 +1223,7 @@ function showPick(){
         ${ch.owner&&!lockedOwner?'<span class="crown">PEMILIK</span>':''}<span class="ph"><img src="${piece(k)}" alt=""></span><b>${ch.name}</b><em>${ch.title}</em><span class="el" style="color:${ELEM[ch.el].c}">${ELEM[ch.el].n}</span>
         ${lockedOwner?'<span class="lock"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Khusus pemilik</span>':''}
         ${lockedBuy?`<span class="lock"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span class="price"><span class="coin">S</span>${ch.price}</span>Ketuk untuk beli</span>`:''}</button>`;}).join('')}</div>
-    <div class="lbl">WARNA KANDANG</div><div class="opts">${SEATCOL.map((x,i)=>`<button class="opt${i===SEL.seat?' sel':''}" data-seat="${i}"><i style="background:${x.c}"></i>${x.n}</button>`).join('')}</div>
+    <div class="lbl">WARNA ARENA</div><div class="opts">${SEATCOL.map((x,i)=>`<button class="opt${i===SEL.seat?' sel':''}" data-seat="${i}"><i style="background:${x.c}"></i>${x.n}</button>`).join('')}</div>
     <div class="lbl">PEMAIN DI HP INI</div><div class="opts">${[1,2,3,4].filter(h=>h<=SEL.np).map(h=>`<button class="opt${SEL.humans===h?' sel':''}" data-hum="${h}"><span>${h} orang<small>${h===1?'Kamu lawan bot':'Gantian di HP ini'}</small></span></button>`).join('')}</div>
     <div class="lbl">ATURAN</div><div class="opts">
       <button class="opt${SEL.np===2?' sel':''}" data-np="2"><span>2 pemain<small>Kamu lawan 1 bot</small></span></button>
@@ -1458,7 +1458,7 @@ function olNameVal(){
   if(n.length<3){document.getElementById('olMsg').textContent='Isi username dulu (minimal 3 karakter).';return null;}
   ST.username=n.slice(0,16);save();return ST.username;
 }
-const GREET=["Selamat Datang Di Room Swara Ludo!", "Selamat datang, pejuang bidak! Siapkan dadumu.", "Hormat untuk tamu kehormatan! Mari bermain.", "Kandang sudah dibuka. Silakan masuk!", "Angin naga berhembus, selamat datang di Swara Ludo.", "Duduklah, teman. Dadu sudah menunggu.", "Siapa yang berani menantang Naga Swara hari ini?", "Jangan takut kalah, yang penting bersenang-senang!", "Selamat datang! Bidakmu sudah siap keluar kandang.", "Enam adalah angka keberuntunganmu. Semoga dapat!", "Ruangan ini milik kita semua. Nikmati permainannya!", "Hati-hati dengan Badai Es dan Sambaran Petir...", "Api naga menyambutmu. Jangan terbakar sebelum mulai!", "Selamat datang di rumah para pemberani.", "Ayo, lempar dadu dan buktikan keberuntunganmu!", "Yang menang akan dapat tepuk tangan dari naga.", "Kandang terbuka lebar. Masuk dan bersenang-senang!", "Ketawa itu boleh, curang itu... ketahuan!", "Selamat datang, sahabat Swara Ludo!", "Dari kandang sampai rumah, semua dilalui dengan gembira.", "Mari bermain sportif. Naga selalu melihat!", "Pelan-pelan, bidakmu tidak akan lari kok.", "Wahai pemain baru, kursimu sudah disiapkan.", "Bersiaplah, ruangan ini tidak pernah sepi.", "Selamat datang, semoga dadumu sering enam!", "Naga Swara senang kamu datang. Ayo mulai!", "Kumpulkan teman, lalu lempar dadu bersama!", "Ruang ini hangat seperti sisik naga. Nyaman, kan?", "Siapa cepat, dia yang sampai di rumah lebih dulu!", "Selamat datang di Swara Ludo. Semoga harimu menyenangkan!"];
+const GREET=["Selamat Datang Di Room Swara Ludo!", "Selamat datang, pejuang bidak! Siapkan dadumu.", "Hormat untuk tamu kehormatan! Mari bermain.", "Arena sudah dibuka. Silakan masuk!", "Angin naga berhembus, selamat datang di Swara Ludo.", "Duduklah, teman. Dadu sudah menunggu.", "Siapa yang berani menantang Naga Swara hari ini?", "Jangan takut kalah, yang penting bersenang-senang!", "Selamat datang! Bidakmu sudah siap keluar arena.", "Enam adalah angka keberuntunganmu. Semoga dapat!", "Ruangan ini milik kita semua. Nikmati permainannya!", "Hati-hati dengan Badai Es dan Sambaran Petir...", "Api naga menyambutmu. Jangan terbakar sebelum mulai!", "Selamat datang di rumah para pemberani.", "Ayo, lempar dadu dan buktikan keberuntunganmu!", "Yang menang akan dapat tepuk tangan dari naga.", "Arena terbuka lebar. Masuk dan bersenang-senang!", "Ketawa itu boleh, curang itu... ketahuan!", "Selamat datang, sahabat Swara Ludo!", "Dari arena sampai rumah, semua dilalui dengan gembira.", "Mari bermain sportif. Naga selalu melihat!", "Pelan-pelan, bidakmu tidak akan lari kok.", "Wahai pemain baru, kursimu sudah disiapkan.", "Bersiaplah, ruangan ini tidak pernah sepi.", "Selamat datang, semoga dadumu sering enam!", "Naga Swara senang kamu datang. Ayo mulai!", "Kumpulkan teman, lalu lempar dadu bersama!", "Ruang ini hangat seperti sisik naga. Nyaman, kan?", "Siapa cepat, dia yang sampai di rumah lebih dulu!", "Selamat datang di Swara Ludo. Semoga harimu menyenangkan!"];
 let _gi=0,_gt=null;
 let _gSpoke=null;
 function greetStart(){if(_gt)return;_gi=Math.floor(Math.random()*GREET.length);const gc=(ONLINE&&ONLINE.code)||'x';if(_gSpoke!==gc){_gSpoke=gc;speakLine(GREET[_gi],.85);}_gt=1;}
@@ -1713,7 +1713,7 @@ window.moveDie=function(){
     const cur=G.players[G.cur];const cc=cur&&document.querySelector('.chip[data-seat="'+cur.seat+'"]');
     if(cc&&!G.over){const dk=SHOP.dice.find(d=>d.id===ST.dice)||SHOP.dice[0];
       const mk=document.createElement('span');mk.className='cube mkcube';mk.dataset.v=G.dieVal||1;
-      mk.style.setProperty('--dface',dk.face);mk.style.setProperty('--dpip',dk.pip);mk.style.transform='rotate('+((G.spin||0)*360)+'deg)';
+      mk.style.setProperty('--dface',dk.face);mk.style.setProperty('--dpip',dk.pip);
       mk.innerHTML=[1,2,3,4,5,6].map(n=>`<span class="face f${n}">${pips(n)}</span>`).join('');
       mk.onclick=(e)=>{e.stopPropagation();const r=document.getElementById('rollBtn');if(r&&!r.disabled)r.click();};
       cc.appendChild(mk);}
