@@ -1655,3 +1655,34 @@ renderUI();
   }catch(e){showLogin('email','Gagal memeriksa akun. Coba muat ulang.');}
 })();
 </script>
+
+<style id="p5css">
+body{padding-bottom:72px}
+.stage{width:min(100%,calc((100dvh - 250px) / .98));margin:0 auto}
+#chatLog{position:fixed;left:8px;right:8px;bottom:56px;max-height:42vh;overflow:auto;background:rgba(13,7,8,.95);border:1px solid #7a5a20;border-radius:12px;padding:6px 10px;z-index:59;font-size:14px}
+#chatLog[hidden]{display:none!important}
+#chatLog div{padding:4px 0;border-bottom:1px solid #3a2414}
+#chatLog b{color:var(--gold2)}
+#chatBox #logBtn{min-width:44px;padding:0 10px;font-size:16px}
+</style>
+<script>
+(function(){
+  try{
+    const cb=document.getElementById('chatBox');
+    const box=document.createElement('div');box.id='chatLog';box.hidden=true;document.body.appendChild(box);
+    if(cb){const b=document.createElement('button');b.id='logBtn';b.type='button';b.textContent='💬';b.setAttribute('aria-label','Riwayat chat');
+      b.addEventListener('click',e=>{e.stopPropagation();box.hidden=!box.hidden;if(!box.hidden)box.scrollTop=box.scrollHeight;});
+      cb.insertBefore(b,cb.firstChild);}
+    window.logChat=function(name,txt){
+      const d=document.createElement('div');const s=document.createElement('b');s.textContent=name+': ';d.appendChild(s);d.appendChild(document.createTextNode(txt));
+      box.appendChild(d);while(box.children.length>60)box.removeChild(box.firstChild);box.scrollTop=box.scrollHeight;};
+    showChatBubble=function(pl,txt){
+      window.logChat(pl.me?'Kamu':(pl.uname||pl.name||'Pemain'),txt);
+      pl.chatLine=txt;pl.chatUntil=Date.now()+9000;renderUI();setTimeout(renderUI,9100);};
+    const _scb=syncChatBox;
+    syncChatBox=function(){_scb();const c=document.getElementById('chatBox');if(c&&c.hidden)box.hidden=true;};
+    document.addEventListener('click',function once(){document.removeEventListener('click',once);
+      try{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('portrait').catch(()=>{});}catch(_){}},{once:true});
+  }catch(err){console.warn('p5',err);}
+})();
+</script>
