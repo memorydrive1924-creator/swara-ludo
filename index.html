@@ -1,4 +1,5 @@
 <title>Swara Ludo Prototype</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Alegreya+Sans:wght@400;500;700;800&display=swap">
@@ -300,7 +301,7 @@ body.cine #fx{z-index:13}
       <li><b>Koin:</b> tiap bidakmu masuk rumah, kamu dapat 10 dari setiap lawan. Menginjak lawan +5 dari yang diinjak. Juara 1 dapat taruhan dan bonus 30.</li>
       <li><b>Giliran</b> 15 detik. Lewat waktu, dadu dilempar otomatis.</li>
       <li><b>Serangan dan hadiah</b> ke kandang lawan hanya efek, tidak menggeser bidak.</li>
-      <li><b>Naga Swara</b> khusus pemilik. Mode Pemilik membuat pertandingan tanpa koin.</li>
+      <li><b>Naga Swara</b> karakter spesial.</li>
     </ul>
   </details>
   <div class="foot">UJI 3 · SWARA COMPANY</div>
@@ -409,7 +410,7 @@ async function listAllUsers(){const {data,error}=await sb.rpc('list_all_users');
 async function getProfile(){const uid=await (async()=>{const {data:{session}}=await sb.auth.getSession();return session?session.user.id:null;})();if(!uid)return null;const {data,error}=await sb.from('profiles').select('username,photo').eq('id',uid).maybeSingle();if(error)throw error;return data;}
 async function myEmail(){const {data:{session}}=await sb.auth.getSession();return session?session.user.email:null;}
 async function myUid(){const {data:{session}}=await sb.auth.getSession();return session?session.user.id:null;}
-function watchRoom(code,cb){return sb.channel('room-'+code).on('postgres_changes',{event:'UPDATE',schema:'public',table:'rooms',filter:'code=eq.'+code},p=>cb(p.new)).subscribe();}
+function watchRoom(code,cb,chat){const ch=sb.channel('room-'+code).on('postgres_changes',{event:'UPDATE',schema:'public',table:'rooms',filter:'code=eq.'+code},p=>cb(p.new));if(chat)ch.on('broadcast',{event:'chat'},m=>chat(m.payload));return ch.subscribe();}
 function unwatchRoom(ch){if(ch)sb.removeChannel(ch);}
 window.AUTH={getProfile,rollDice,pushState,myEmail,listAllUsers,createRoom,joinRoom,startRoom,getRoom,myUid,watchRoom,unwatchRoom,signUpPassword,signInPassword,sendLoginCode,verifyLoginCode,getAccess,checkOwner,claimDaily,getCoins,saveProfile,grantAccess,revokeAccess,listGrants,signOut,sb};
 </script>
@@ -581,7 +582,7 @@ async function playClip(k,mood){
   const src=AU.ctx.createBufferSource();src.buffer=b;src.connect(AU.voiceG);src.start();CURV[k]=src;src.onended=()=>{if(CURV[k]===src)CURV[k]=null;};
 }
 let lastVoice=0;
-function vocal(mood,k,force){
+function vocal(mood,k,force){if((ST.talk||'sedikit')==='diam'&&!window._tv)return;
   const c=AU.ctx;if(!c||!AU.on)return;const t0=Date.now();if(!force&&t0-lastVoice<350)return;lastVoice=t0;
   if(hasClip(k+'_'+mood)){playClip(k,mood);return;}
   const ch=CHARS[k]||CHARS.arvan;const f0=(ch.fem?225:125)*ch.pitch,fs=ch.fem?1.12:.92,t=c.currentTime+.03;
@@ -763,14 +764,40 @@ function splash(a,b,word,sub,am,bm){
   el.innerHTML=`<div class="faces">${a?`<div class="bigface" style="border-color:${a.color}"><img src="${face(a.char,am||'tertawa')}" alt=""></div>`:''}${a&&b?'<div class="vs">VS</div>':''}${b?`<div class="bigface" style="border-color:${b.color}"><img src="${face(b.char,bm||'kesakitan')}" alt=""></div>`:''}</div><div class="word">${word}</div>${sub?`<div class="sub">${esc(sub)}</div>`:''}`;
   document.getElementById('stage').appendChild(el);setTimeout(()=>el.remove(),1700);
 }
-function emotePop(pl,mood,line){
+function emotePop(pl,mood,line){if((ST.talk||'sedikit')==='diam'&&!window._tv)return;
   const [bx,by]=stageRel(...basePos(pl.seat));const st=document.getElementById('stage');
   const el=document.createElement('div');el.className='emopop';el.style.borderColor=pl.color;el.style.left=bx+'px';el.style.top=by+'px';el.innerHTML=`<img src="${face(pl.char,mood)}" alt="">`;st.appendChild(el);setTimeout(()=>el.remove(),1800);
   if(line){const cap=document.createElement('div');cap.className='emocap';cap.textContent=line;cap.style.left=bx+'px';cap.style.top=(by+st.offsetWidth*.09)+'px';st.appendChild(cap);setTimeout(()=>cap.remove(),1800);}
 }
 
 /* ================= koin ================= */
+const LUCKY={"arvan": ["Badai salju berpihak padaku! Enam!", "Dingin begini, enam pun ikut membeku!", "Serigala es datang membawa enam!", "Salju turun, dan angka enam ikut turun!", "Dari badai ini, aku dapat enam!", "Serigala melolong, dan enam datang!"], "elvara": ["Alam memberkatiku dengan enam!", "Angin hutan membawa keberuntungan!", "Hutan tak pernah mengecewakan, dapat enam!", "Daun-daun bersorak, enam datang!", "Rusa hutan berlari membawa enam!", "Akar bumi memberiku enam!"], "mahesa": ["Petir emas! Enam!", "Taring emas tak pernah meleset!", "Sambaran keberuntungan: enam!", "Kilat emas menyala, dan enam datang!", "Harimau emas mengaum: enam!", "Cakarku siap, dan dapat enam!"], "ragnar": ["Gempa datang, dan enam ikut!", "Kaki raksasaku berkata: maju!", "Hantam! Enam!", "Tanah bergetar, dan enam untukku!", "Babi liar menyeruduk dan dapat enam!", "Kekuatanku bangkit, dapat enam!"], "mikara": ["Roh rubah berbisik: enam!", "Sakura berguguran, enam untukku!", "Ekor rubah membawa keberuntungan!", "Kelopak sakura jatuh, dapat enam!", "Rubah ini sedang beruntung!", "Angin musim semi membawa enam!"], "kazra": ["Bayangan memberi enam!", "Dalam gelap aku melihat angka enam!", "Pemburu tak pernah lupa menerkam!", "Panther mengintai, dan enam menanti!", "Senyap seperti bayangan, dapat enam!", "Gelap ini berpihak padaku!"], "zareth": ["Api ungu membara, enam!", "Phoenix bangkit dengan enam!", "Aku terbang lagi!", "Sayapku mengembang, enam di tangan!", "Bara ungu menyala, enam untukku!", "Phoenix tak pernah kalah!"], "gantara": ["Matahari di pihakku, enam!", "Dari langit, angka enam turun!", "Kilau surya membawa enam!", "Elang melintas, dan enam turun!", "Langit terbuka untukku!", "Sinar surya membawa enam!"], "aurelia": ["Air kristal menjernihkan jalanku!", "Ramalanku benar, enam!", "Mata air keberuntungan!", "Kristal bersinar, enam di depan mata!", "Air mengalir, enam datang!", "Ramalan berkata: enam!"], "naga": ["Naga Swara memberkatiku dengan enam!", "Api naga menyala, dan enam datang!", "Keberuntungan sang naga!", "Sisik naga berkilau, dapat enam!", "Api naga bersorak untuk enam!", "Naga Swara tersenyum: enam!"]};
+function speakLine(text,pitch){
+  try{if(!('speechSynthesis' in window)||(ST.talk||'sedikit')==='diam')return;
+    const u=new SpeechSynthesisUtterance(text);u.lang='id-ID';u.pitch=pitch||1;u.rate=.95;
+    const v=speechSynthesis.getVoices().find(x=>/^id/i.test(x.lang));if(v)u.voice=v;
+    speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}
+}
+const CAPT={"arvan": ["Dingin, kan? Ini hadiahku!", "Kubekukan kau di sini!", "Badai es menyapu jalanmu!", "Dingin begini, kau tak akan bisa bangkit!", "Kau sudah jadi patung es!", "Terinjak dalam salju!"], "elvara": ["Akar hutan menjeratmu!", "Alam tidak lupa membalas!", "Hutan ini tak akan memaafkanmu!", "Bunga hutan menyambutmu pulang!", "Kau tersesat di hutanku!", "Pohon tua tidak pernah lupa!"], "mahesa": ["Sambaran emas! Kena kau!", "Petir tak pernah salah sasaran!", "Pulang sana, kau kalah!", "Taring emas menggigit!", "Kilat menyambarmu, pulang!", "Harimau emas tidak pernah lengah!"], "ragnar": ["Hantam! Kau terinjak!", "Gempa membuatmu terpental!", "Kaki raksasaku tidak pernah ragu!", "Tanah bergetar untukmu!", "Injak! Injak! Pulang!", "Bersiaplah terpental!"], "mikara": ["Tebasan angin! Kena!", "Roh rubah menyeretmu pulang!", "Ekorku baru saja mengejarmu!", "Angin menyapumu keluar!", "Daun sakura jatuh di atasmu!", "Rubah tak pernah lengah!"], "kazra": ["Dari bayangan aku datang!", "Kena cakar besi!", "Pemburu sudah menerkam!", "Tak ada yang lari dari bayangan!", "Cakarku sudah mengenaimu!", "Sunyi sebelum kau terinjak!"], "zareth": ["Kutukan bayangan menyambarmu!", "Api ungu melahapmu!", "Terbanglah kembali ke kandang!", "Burung ungu menukik!", "Api phoenix belum padam!", "Kau kembali ke awal!"], "gantara": ["Pukulan tanah! Kena!", "Langit menurunkan hukumanku!", "Kau tergeser dari jalanmu!", "Angin dari langit menurunkanmu!", "Hukum surya, pulang kau!", "Tanah pun ikut menghantammu!"], "aurelia": ["Cahaya menyilaukan! Kena!", "Air kristal menghapus jejakmu!", "Ramalanku menjatuhkanmu!", "Mata air membawamu pergi!", "Kristal dingin menusukmu!", "Ramalan tak pernah salah, kau kalah!"], "naga": ["Napas api! Kau hangus!", "Ekor naga menyapu jalanmu!", "Sisik naga tak mudah dikalahkan!", "Api naga tak pernah padam!", "Sisik emas menyapumu!", "Naga tidak mengampuni!"]};
+const VICT={"arvan": ["Badai salju menyapu semuanya, aku menang!", "Serigala es pulang dengan kemenangan!", "Dingin begini, kalian semua kalah!", "Salju turun untuk merayakan kemenanganku!", "Aku sampai di rumah lebih dulu, bersih!", "Lolongan kemenangan untuk serigala es!"], "elvara": ["Hutan menyambut kemenanganku!", "Alam memberkatiku, aku pulang sebagai juara!", "Daun-daun bersorak untukku!", "Akar bumi menjadi saksi kemenanganku!", "Rusa hutan kembali ke rumah sebagai juara!", "Kemenangan ini berkat hutan yang sabar!"], "mahesa": ["Petir emas menyambar, aku juara!", "Taring emas tak pernah kalah!", "Harimau emas mengaum untuk kemenangan!", "Kalian tak bisa mengejar kilat emas!", "Sambaran terakhir, dan aku pemenangnya!", "Emas ini milikku, juara!"], "ragnar": ["Gempa kemenangan, aku pemenangnya!", "Tanah bergetar untuk juara!", "Babi liar pulang dengan kemenangan!", "Kalian terinjak, aku menang!", "Kekuatanku membuktikan kemenangan!", "Hantam, dan juara ada di tanganku!"], "mikara": ["Sakura gugur untuk juara!", "Roh rubah tersenyum, aku pemenangnya!", "Ekor rubah membawaku pulang sebagai juara!", "Angin musim semi membawa kemenanganku!", "Rubah tak pernah kalah, pulang sebagai juara!", "Kelopak sakura menari untuk kemenanganku!"], "kazra": ["Dari bayangan, aku pulang sebagai juara!", "Pemburu selalu menang di akhir!", "Senyap dan menang, itu caraku!", "Gelap ini memberiku kemenangan!", "Tak ada yang bisa mengejar bayangan!", "Panther pulang dengan mangsa dan kemenangan!"], "zareth": ["Phoenix bangkit, aku juara!", "Api ungu membara untuk kemenanganku!", "Sayapku membawaku pulang sebagai juara!", "Kalian tertinggal di belakang bara!", "Kemenangan dari abu, itu milikku!", "Phoenix tak pernah kalah!"], "gantara": ["Langit menjadi saksi kemenanganku!", "Elang pulang dengan kemenangan!", "Matahari bersinar untuk juara!", "Dari atas langit, aku menang!", "Kemenangan ini milik langit!", "Sinar surya menyambut juara!"], "aurelia": ["Air kristal mengalir untuk juara!", "Ramalanku benar, aku pemenangnya!", "Mata air keberuntungan menutup pertandingan!", "Kristal bersinar untuk kemenanganku!", "Aku menang, sesuai ramalan!", "Air jernih, kemenangan pun jernih!"], "naga": ["Naga Swara pulang sebagai juara!", "Api naga menyala untuk kemenanganku!", "Sisik naga tak tertembus, aku menang!", "Keberuntungan sang naga, juara!", "Kalian semua tunduk pada juara!", "Naga Swara tersenyum, aku juara!"]};
+function victorySay(k){const c=CHARS[k];if(!c||!VICT[k])return;speakLine(pick(VICT[k]),c.pitch);}
+function captureSay(k){
+  if((ST.talk||'sedikit')==='sedikit'&&Math.random()<.5)return;
+  const c=CHARS[k];if(!c||!CAPT[k])return;speakLine(pick(CAPT[k]),c.pitch);
+}
+function luckySay(k){
+  if((ST.talk||'sedikit')==='sedikit'&&Math.random()<.5)return;
+  const c=CHARS[k];if(!c)return;speakLine(pick(LUCKY[k]),c.pitch);
+}
 function meP(){return G.players.find(p=>p.me)||meP();}
+let _sx=[];
+function secretTap(){if(!G||!meP().owner)return;const t=Date.now();_sx=_sx.filter(x=>t-x<2500);_sx.push(t);
+  if(_sx.length>=5){_sx=[];G.ownerMode=!G.ownerMode;if(G.ownerMode)G.noCoins=true;renderUI();}}
+function showChatBubble(pl,txt){pl.chatLine=txt;pl.chatUntil=Date.now()+6000;renderUI();setTimeout(renderUI,6100);}
+function sendChat(){const inp=document.getElementById('chatIn');const txt=(inp.value||'').trim().slice(0,120);if(!txt||!G)return;inp.value='';
+  showChatBubble(meP(),txt);
+  if(ONLINE&&roomCh)roomCh.send({type:'broadcast',event:'chat',payload:{uid:ONLINE.uid,text:txt}});}
+function onChatRemote(p){if(!G||!p)return;const pl=G.players.find(q=>q.uid===p.uid);if(pl&&!pl.me)showChatBubble(pl,String(p.text||'').slice(0,120));}
 function coinsOf(pl){return pl.me?ST.coins:pl.coins;}
 function addCoins(pl,n){
   if(pl.me){ST.coins=Math.max(0,ST.coins+n);save();updateCoins();if(n>0)sfx('coin');}else pl.coins=Math.max(0,pl.coins+n);
@@ -782,7 +809,7 @@ function updateCoins(){document.getElementById('coinVal').textContent=(typeof IS
 
 /* ================= alur permainan ================= */
 function log(m){G.log=m;}
-function setMood(pl,m,speak,force,line){pl.mood=m;pl.moodUntil=Date.now()+2600;pl.line=line||(speak?pick(LINES[m]):'');if(speak)vocal(m,pl.char,force);renderUI();setTimeout(renderUI,2700);}
+function setMood(pl,m,speak,force,line){const tk=ST.talk||'sedikit';if(tk==='diam')speak=false;else if(tk==='sedikit'&&!force)speak=speak&&Math.random()<.4;pl.mood=m;pl.moodUntil=Date.now()+2600;pl.line=line||'';if(speak)vocal(m,pl.char,force);renderUI();setTimeout(renderUI,2700);}
 function moodOf(pl){return Date.now()<pl.moodUntil?pl.mood:'tenang';}
 function sfx(n){if(AU.ctx&&AU.on)SFX[n]();}
 function newGame(){
@@ -800,7 +827,8 @@ function newGame(){
   players.forEach(p=>preloadChar(p.char));
   document.getElementById('ov').hidden=true;closeSheet();
   buildBoard();placeTokens();
-  log(players[0].owner?'Naga Swara memasuki arena. Pemilik rumah hadir!':'Lempar dadu. Butuh 6 untuk keluar kandang.');
+  {const gsx=GREET[Math.floor(Math.random()*GREET.length)];toast(gsx);speakLine(gsx,.85);}
+  log('Lempar dadu. Butuh 6 untuk keluar kandang.');
   if(players[0].owner)setTimeout(()=>legendary('naga','NAGA SWARA'),400);else{animalCry(CHARS[me].animal);setTimeout(()=>{const [x,y]=basePos(0);burst(CHARS[me].el,x,y,1.2);elemSound(CHARS[me].el);},300);}
   setTimeout(()=>players.slice(1).forEach((b,i)=>setTimeout(()=>emotePop(b,'mengejek'),i*220)),900);
   startTurn();
@@ -822,6 +850,7 @@ async function roll(pl,forced){
   const v=forced||(ONLINE&&pl.me?await rollOnline():d6());if(v==null){G.busy=false;G.phase='roll';renderUI();return;}G.dieVal=v;sfx('dice');spinDie(v);
   await sleep(REDUCED?150:(pl.bot?750:1000));
   G.lastRoll=v;
+  if(v===6&&pl.me)luckySay(pl.char);
   if(v===6){pl.sixes++;pl.sixCount++;sfx('six');setMood(pl,'senang',pl.me);
     if(pl.sixes===3&&!godOn(pl)){log(`${pl.uname} dapat enam tiga kali! Giliran hangus.`);sfx('bust');setMood(pl,'marah',true,true);G.phase='wait';renderUI();await sleep(1300);return nextTurn();}}
   G.moves=legal(pl,v);
@@ -869,7 +898,7 @@ async function capture(pl,ti,hit){
   const att=document.getElementById(`pc${pl.seat}_${ti}`);if(att){att.classList.remove('rear');void att.offsetWidth;att.classList.add('rear');}
   hit.forEach(h=>{const e=document.getElementById(`pc${h.q.seat}_${h.qi}`);if(e)e.classList.add('fall');});
   const [x,y]=pcPos(v,hit[0].qi);
-  pl.caps++;v.eaten++;
+  pl.caps++;v.eaten++;captureSay(pl.char);
   if(hasLegend(pl))legendary(pl.char,pl.char==='naga'?'AMUKAN NAGA!':'DIINJAK!');else{burst(el,x,y,1.6);elemSound(el);shake();}
   splash(pl,v,'DIINJAK!',`${pl.uname} menginjak ${v.uname}`);
   setMood(v,'kesakitan',true,true);setTimeout(()=>setMood(pl,'tertawa',true,true),700);
@@ -883,6 +912,7 @@ async function capture(pl,ti,hit){
 }
 function finish(pl){
   G.over=true;G.phase='over';G.busy=true;G.deadline=0;
+  victorySay(pl.char);
   log(`${pl.uname} memenangkan pertandingan!`);pl.mood='tertawa';pl.moodUntil=Date.now()+1e9;
   const rank=[pl,...G.players.filter(p=>p!==pl).sort((a,b)=>doneCount(b)-doneCount(a)||progress(b)-progress(a))];G.rank=rank;
   if(G.stake){
@@ -996,7 +1026,7 @@ function sendFx(from,toSeat,kind,elOv){
     if(to.bot&&Math.random()<.5)setTimeout(()=>botSend(to,from.seat,Math.random()<.7?'attack':'emote'),2200);
   } else {
     for(let i=0;i<26;i++)FX.add({type:pick(['petal','spark']),x:x+rnd(-60,60),y:y-rnd(60,140),vx:rnd(-.5,.5),vy:rnd(1,3),size:rnd(3,6),col:pick(['#ffd36b','#ff9ac8','#ffffff']),dec:.012,add:false});
-    burst('sun',x,y,.8);sfx('gift');setMood(to,'senang',true,true);emotePop(to,'senang','Terima kasih!');
+    burst('sun',x,y,.8);sfx('gift');setMood(to,'senang',true,true);emotePop(to,'senang');
   }
 }
 function canApply(eff,from,to){
@@ -1080,14 +1110,15 @@ function avatarHTML(pl,m,size){
 function sndIcon(){return AU.on?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9zM17 9l5 5M22 9l-5 5"/></svg>';}
 function pips(n){const P={1:[5],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]}[n];let s='';for(let i=1;i<=9;i++)if(P.includes(i))s+=`<i style="grid-area:${Math.ceil(i/3)}/${(i-1)%3+1}"></i>`;return s;}
 function renderUI(){
+  const cb=document.getElementById('chatBox');if(cb)cb.hidden=!G||!document.getElementById('ov').hidden;
   const sb=document.getElementById('sndBtn');sb.innerHTML=sndIcon();sb.setAttribute('aria-label',AU.on?'Matikan suara':'Nyalakan suara');
   updateCoins();
   if(!G)return;
   const cur=G.players[G.cur],me=meP();
-  document.getElementById('ownerSlot').innerHTML=me.owner?`<div class="ownerbar"><div style="flex:1"><b>Mode Pemilik</b><br><span style="color:var(--dim);font-size:12px">${G.ownerMode?'Aktif: atur dadu, kebal, Amukan Naga. Pertandingan ini tanpa koin.':'Mati: Naga Swara main normal.'}</span></div><button class="sw" id="godSw" aria-pressed="${G.ownerMode}" aria-label="Mode Pemilik"><i></i></button></div>`:'';
+  document.getElementById('ownerSlot').innerHTML='';
   document.getElementById('strip').innerHTML=G.players.map(pl=>{const m=moodOf(pl);
-    return `<div class="chip${pl===cur&&!G.over?' now':''}" data-seat="${pl.seat}">${m!=='tenang'&&pl.line?`<div class="bubble">${esc(pl.line)}</div>`:''}<div class="avw">${avatarHTML(pl,m)}<span class="mini" style="border-color:${pl.color}"><img src="${face(pl.char,m)}" alt=""></span></div>
-      <div class="nm">${esc(pl.uname)}</div><div class="st">Rumah ${doneCount(pl)}/${G.n} · ${pl.owner?'Penguasa Naga':coinsOf(pl)}</div>${godOn(pl)?'<span class="bdg">DEWA</span>':''}</div>`;}).join('');
+    return `<div class="chip${pl===cur&&!G.over?' now':''}" data-seat="${pl.seat}">${pl.chatLine&&Date.now()<(pl.chatUntil||0)?`<div class="bubble">${esc(pl.chatLine)}</div>`:''}<div class="avw">${avatarHTML(pl,m)}<span class="mini" style="border-color:${pl.color}"><img src="${face(pl.char,m)}" alt=""></span></div>
+      <div class="nm">${esc(pl.uname)}</div><div class="st">Rumah ${doneCount(pl)}/${G.n} · ${pl.owner?'Penguasa Naga':coinsOf(pl)}</div></div>`;}).join('');
   const myTurn=(ONLINE?G.players[G.cur].me:!G.players[G.cur].bot)&&!G.over;const canRoll=myTurn&&G.phase==='roll'&&!G.busy;
   let title,hint;
   if(G.over){title='Selesai';hint='';}
@@ -1133,16 +1164,13 @@ document.addEventListener('click',e=>{
   if(q('#doAtk2')){playerSend(G.targetSeat,'attack2');return;}
   if(q('#doGift')){playerSend(G.targetSeat,'gift');return;}
   if(q('#sendOpen')){openSend();return;}
-  const chip=q('.chip');if(chip&&!(PSEAT(+chip.dataset.seat)||{}).me&&!G.over){openSend(+chip.dataset.seat);return;}
+  const chip=q('.chip');if(chip&&(PSEAT(+chip.dataset.seat)||{}).me){secretTap();return;}
+  if(chip&&!G.over){openSend(+chip.dataset.seat);return;}
   const pc=q('.pc');if(pc&&+pc.dataset.seat===cur.seat&&G.phase==='choose'&&!cur.bot&&!G.busy){const m=G.moves.find(m=>m.ti===+pc.dataset.ti);if(m)move(cur,m);return;}
   if(q('#rollBtn')&&!cur.bot&&(!ONLINE||cur.me)){roll(cur);return;}
   const fb=q('[data-force]');if(fb&&G.ownerMode&&!cur.bot){roll(cur,+fb.dataset.force);return;}
   if(q('#rage')){nagaRage();return;}
   const em=q('[data-emo]');if(em){const m=em.dataset.emo;setMood(cur,m,true,true);emotePop(cur,m,cur.line);botReact(m);return;}
-  if(q('#godSw')&&me.owner){G.ownerMode=!G.ownerMode;
-    if(G.ownerMode){if(!G.noCoins){G.noCoins=true;toast('Mode Pemilik aktif: pertandingan ini tanpa koin');}legendary('naga','MODE PEMILIK');log('Mode Pemilik aktif. Naga Swara tak tersentuh.');setMood(me,'mengejek',true,true);G.players.filter(p=>p.bot).forEach((b,i)=>setTimeout(()=>{setMood(b,'kaget');emotePop(b,'kaget');},700+i*250));}
-    else{log('Mode Pemilik dimatikan. Koin tetap tidak berlaku di pertandingan ini.');}
-    renderUI();return;}
 });
 
 /* ================= menu utama ================= */
@@ -1204,7 +1232,7 @@ function showShop(tab){
 function showResult(){
   const ov=document.getElementById('ov');ov.hidden=false;closeSheet();const me=meP();const w=G.rank[0];const iWin=w===me;
   let ttl='Juara Arena';const most=[...G.players].sort((a,b)=>b.caps-a.caps)[0];
-  if(w.owner&&G.ownerMode)ttl='Pemilik Rumah';else if(w.eaten>=3)ttl='Bangkit dari Kubur';else if(w===most&&w.caps>=2)ttl='Pemakan Bidak';else if(w.sixCount>=4)ttl='Raja Enam';
+  if(w.eaten>=3)ttl='Bangkit dari Kubur';else if(w===most&&w.caps>=2)ttl='Pemakan Bidak';else if(w.sixCount>=4)ttl='Raja Enam';
   const myRank=G.rank.indexOf(me);const lost=myRank>=2&&!G.noCoins;const dare=pick(DARES);G.dare=dare;
   const coin=p=>G.noCoins?'<span class="dim">tanpa koin</span>':`<span class="${p.delta>=0?'plus':'minus'}">${p.delta>=0?'+':''}${p.delta}</span>`;
   const crown=`<svg class="vcrown" viewBox="0 0 64 40" aria-hidden="true"><path d="M4 36L8 10l14 14L32 4l10 20 14-14 4 26z" fill="#e3b45a" stroke="#7a4a10" stroke-width="2"/><circle cx="32" cy="22" r="4" fill="#d83a32"/><circle cx="16" cy="28" r="3" fill="#4fb0ea"/><circle cx="48" cy="28" r="3" fill="#5ecf6a"/></svg>`;
@@ -1239,6 +1267,8 @@ function showSettings(){
       <label for="volMus">Musik gamelan<input id="volMus" type="range" min="0" max="100" value="${Math.round(AU.music*100)}"></label>
       <label for="volSfx">Efek<input id="volSfx" type="range" min="0" max="100" value="${Math.round(AU.sfx*100)}"></label>
       <label for="volVoice">Suara karakter (aduh, tawa, tangis)<input id="volVoice" type="range" min="0" max="100" value="${Math.round(AU.voice*100)}"></label>
+      <div class="rowx"><span>Karakter bicara</span></div>
+      <div class="opts">${[['banyak','Banyak'],['sedikit','Sedikit'],['diam','Diam']].map(([k,l])=>`<button class="opt${(ST.talk||'sedikit')===k?' sel':''}" data-talk="${k}"><span>${l}</span></button>`).join('')}</div>
       <button class="ghost" id="testSfx">Tes suara karakter</button>
       <div class="note" style="text-align:left">Tidak terdengar? Naikkan volume media HP. Di iPhone matikan mode senyap.</div></div>
     <button class="big" id="closeSet">${G&&!G.over?'KEMBALI KE PERMAINAN':'TUTUP'}</button></div>`;
@@ -1322,7 +1352,7 @@ function startOnline(r){
   if(!ONLINE||ONLINE.started||(r.players||[]).length<2)return;
   const list=r.players.slice().sort((a,b)=>a.seat-b.seat);
   const seats=SEATS[list.length]||SEATS[4];
-  ONLINE.started=true;unlockAudio();
+  ONLINE.started=true;unlockAudio();const gsx=GREET[Math.floor(Math.random()*GREET.length)];toast(gsx);speakLine(gsx,.85);
   const players=list.map((p,i)=>{const me=p.uid===ONLINE.uid;return {uid:p.uid,me,seat:seats[i],char:p.char,uname:me?myName():p.name,photo:me?ST.photo:'',color:SEATCOL[seats[i]].c,bot:false,owner:me&&p.char==='naga',
     tokens:Array.from({length:4},()=>({p:-1})),sixes:0,mood:'tenang',moodUntil:0,coins:500,delta:0,caps:0,eaten:0,sixCount:0,lastSend:0};});
   G={players,n:4,cur:Math.max(0,players.findIndex(p=>p.uid===r.turn_uid)),round:1,phase:'wait',moves:[],busy:false,log:'',over:false,ownerMode:false,noCoins:false,stake:false,dieVal:1,spin:0,breathUsed:false,lastRoll:0,timer:0,deadline:0,targetSeat:(players.find(p=>!p.me)||players[0]).seat};
@@ -1335,12 +1365,13 @@ function startOnline(r){
 function applyOnline(r){
   const st=r.state;if(!G||!st||!st.players||st.from===ONLINE.uid||(st.at||0)<=ONLINE.lastAt)return;
   ONLINE.lastAt=st.at;
+  {const sp=G.players.find(q=>q.uid===st.from);const s0=st.players.find(x=>x.uid===st.from);if(sp&&s0&&s0.caps>sp.caps)captureSay(sp.char);}
   st.players.forEach(s=>{const p=G.players.find(q=>q.uid===s.uid);if(!p)return;
     p.tokens.forEach((t,i)=>{t.p=s.tokens[i];});
     if(!p.me)p.coins=s.coins;
     p.caps=s.caps;p.eaten=s.eaten;p.sixCount=s.sixCount;p.frozenNext=s.frozenNext;p.silenceNext=s.silenceNext;});
   G.round=st.round;G.log=st.log;
-  if(st.die){G.dieVal=st.die;spinDie(st.die);}
+  if(st.die){G.dieVal=st.die;spinDie(st.die);if(st.die===6){const sp=G.players.find(q=>q.uid===st.from);if(sp)luckySay(sp.char);}}
   G.cur=Math.max(0,G.players.findIndex(p=>p.uid===r.turn_uid));
   G.phase='wait';G.busy=false;G.deadline=0;
   placeTokens();renderUI();
@@ -1377,12 +1408,17 @@ function olNameVal(){
   if(n.length<3){document.getElementById('olMsg').textContent='Isi username dulu (minimal 3 karakter).';return null;}
   ST.username=n.slice(0,16);save();return ST.username;
 }
+const GREET=["Selamat Datang Di Room Swara Ludo!", "Selamat datang, pejuang bidak! Siapkan dadumu.", "Hormat untuk tamu kehormatan! Mari bermain.", "Kandang sudah dibuka. Silakan masuk!", "Angin naga berhembus, selamat datang di Swara Ludo.", "Duduklah, teman. Dadu sudah menunggu.", "Siapa yang berani menantang Naga Swara hari ini?", "Jangan takut kalah, yang penting bersenang-senang!", "Selamat datang! Bidakmu sudah siap keluar kandang.", "Enam adalah angka keberuntunganmu. Semoga dapat!", "Ruangan ini milik kita semua. Nikmati permainannya!", "Hati-hati dengan Badai Es dan Sambaran Petir...", "Api naga menyambutmu. Jangan terbakar sebelum mulai!", "Selamat datang di rumah para pemberani.", "Ayo, lempar dadu dan buktikan keberuntunganmu!", "Yang menang akan dapat tepuk tangan dari naga.", "Kandang terbuka lebar. Masuk dan bersenang-senang!", "Ketawa itu boleh, curang itu... ketahuan!", "Selamat datang, sahabat Swara Ludo!", "Dari kandang sampai rumah, semua dilalui dengan gembira.", "Mari bermain sportif. Naga selalu melihat!", "Pelan-pelan, bidakmu tidak akan lari kok.", "Wahai pemain baru, kursimu sudah disiapkan.", "Bersiaplah, ruangan ini tidak pernah sepi.", "Selamat datang, semoga dadumu sering enam!", "Naga Swara senang kamu datang. Ayo mulai!", "Kumpulkan teman, lalu lempar dadu bersama!", "Ruang ini hangat seperti sisik naga. Nyaman, kan?", "Siapa cepat, dia yang sampai di rumah lebih dulu!", "Selamat datang di Swara Ludo. Semoga harimu menyenangkan!"];
+let _gi=0,_gt=null;
+function greetStart(){if(_gt)return;_gi=Math.floor(Math.random()*GREET.length);speakLine(GREET[_gi],.85);_gt=setInterval(()=>{const el=document.getElementById('greet');if(!el)return;_gi=(_gi+1)%GREET.length;el.textContent=GREET[_gi];speakLine(GREET[_gi],.85);},3500);}
+function greetStop(){clearInterval(_gt);_gt=null;}
 function renderLobby(room){
   const me=window._uid;const isHost=room.host_id===me;
   const list=(room.players||[]).slice().sort((a,b)=>a.seat-b.seat).map(p=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #3a2414;font-size:14px"><span>${esc(p.name)}${p.uid===me?' (kamu)':''}</span><span style="color:var(--dim)">${CHARS[p.char]?esc(CHARS[p.char].name):''}</span></div>`).join('');
   const started=room.status!=='lobby';
   ovEl.innerHTML=`<div class="ovin" style="max-width:460px;margin:auto">
     <h2 style="font-family:var(--display);color:var(--gold2);margin:4px 0">Lobi Room</h2>
+    <div id="greet" style="min-height:44px;display:flex;align-items:center;justify-content:center;text-align:center;color:#ffd9a0;font-family:var(--display);font-size:18px;padding:6px 10px;border-radius:12px;background:linear-gradient(90deg,#3a1408,#1f0c08);border:1px solid #7a5a20">${esc(GREET[_gi])}</div>
     <div style="background:#140a0c;border:1px solid #7a5a20;border-radius:14px;padding:12px;margin:10px 0;text-align:center">
       <div style="color:var(--dim);font-size:12px;letter-spacing:1px">KODE ROOM UNTUK TEMANMU</div>
       <div style="font-family:var(--display);font-size:34px;letter-spacing:6px;color:var(--gold2);margin:6px 0">${esc(room.code)}</div>
@@ -1401,12 +1437,12 @@ async function enterRoom(code){
   ONLINE={code,uid:window._uid,lastAt:0,started:false};
   const room=await AUTH.getRoom(code);
   if(!room) throw new Error('Room tidak ditemukan');
-  renderLobby(room);
+  renderLobby(room);greetStart();
   AUTH.unwatchRoom(roomCh);
-  roomCh=AUTH.watchRoom(code,r=>{if(curRoom!==code)return;if(ONLINE&&(ONLINE.started||r.status==='playing')){onRoomUpdate(r);return;}renderLobby(r);});
+  roomCh=AUTH.watchRoom(code,r=>{if(curRoom!==code)return;if(ONLINE&&(ONLINE.started||r.status==='playing')){onRoomUpdate(r);return;}renderLobby(r);},p=>onChatRemote(p));
 }
 function leaveRoomUI(){
-  AUTH.unwatchRoom(roomCh);roomCh=null;curRoom=null;ONLINE=null;showPick();
+  AUTH.unwatchRoom(roomCh);roomCh=null;curRoom=null;ONLINE=null;greetStop();showPick();
 }
 ovEl.addEventListener('click',async e=>{
   const id=e.target.id;
@@ -1442,6 +1478,14 @@ ovEl.addEventListener('click',async e=>{
   }
 });
 
+/* ================= kotak ketik pesan di permainan ================= */
+(function(){
+  const cb=document.createElement('div');cb.id='chatBox';cb.hidden=true;
+  cb.innerHTML='<input id="chatIn" maxlength="120" placeholder="Ketik pesan..." autocomplete="off"><button id="chatSend">Kirim</button>';
+  document.body.appendChild(cb);
+  const inp=cb.querySelector('#chatIn');inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendChat();}});
+  const st=document.createElement('style');st.textContent='#chatBox{position:fixed;left:8px;right:8px;bottom:8px;display:flex;gap:6px;z-index:60}#chatBox input{flex:1;min-width:0;height:42px;border-radius:12px;border:1px solid #7a5a20;background:#140a0c;color:#fff;padding:0 12px;font-size:16px}#chatBox button{height:42px;padding:0 14px;border-radius:12px;border:1px solid var(--gold);background:#2d1a10;color:var(--gold2);font-weight:800}';document.head.appendChild(st);
+})();
 /* ================= login dan izin (Supabase) ================= */
 let lgEmail='';
 function showLogin(stage,msg){
@@ -1536,7 +1580,9 @@ ovEl.addEventListener('click',e=>{
   if(q('#dareFree')){ST.freeCards--;save();document.getElementById('dareBox').innerHTML='<h3>Bebas!</h3><p>Kartu Bebas Hukuman dipakai.</p>';sfx('buy');return;}
   if(q('#darePay')){if(ST.coins<50){toast('Koin tidak cukup');return;}ST.coins-=50;save();updateCoins();document.getElementById('dareBox').innerHTML='<h3>Bebas!</h3><p>Kamu membayar 50 koin.</p>';sfx('coin');return;}
   if(q('#setOn')){AU.on=!AU.on;applyVol();saveAudio();showSettings();renderUI();return;}
-  if(q('#testSfx')){const k=G?meP().char:SEL.char;['tertawa','kesakitan','sedih','mengejek','kaget','marah'].forEach((m,i)=>setTimeout(()=>vocal(m,k,true),i*1300));return;}
+  const tk2=q('[data-talk]');if(tk2){ST.talk=tk2.dataset.talk;save();showSettings();return;}
+  if(q('#chatSend')){sendChat();return;}
+  if(q('#testSfx')){window._tv=true;setTimeout(()=>window._tv=false,9000);const k=G?meP().char:SEL.char;['tertawa','kesakitan','sedih','mengejek','kaget','marah'].forEach((m,i)=>setTimeout(()=>vocal(m,k,true),i*1300));return;}
   if(q('#closeSet')){if(G&&!G.over)ovEl.hidden=true;else if(G&&G.over)showResult();else showPick();}
 });
 ovEl.addEventListener('change',e=>{if(e.target.id==='photoIn'&&e.target.files[0])readPhoto(e.target.files[0]);});
