@@ -341,8 +341,9 @@ async function getAccess() {
   const { data, error } = await sb.from('access_grants')
     .select('access_until').eq('user_id', session.user.id).maybeSingle();
   if (error) return { loggedIn: true, allowed: false, error };
-  const until = data ? new Date(data.access_until) : null;
-  const allowed = !!until && until > new Date();
+  const isInf = !!data && String(data.access_until).startsWith('infinity');
+  const until = data && !isInf ? new Date(data.access_until) : null;
+  const allowed = !!data && (isInf || (!!until && until > new Date()));
   return { loggedIn: true, allowed, until, userId: session.user.id };
 }
 
