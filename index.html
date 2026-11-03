@@ -1396,7 +1396,7 @@ function syncTurn(r){
 function checkIdleTurn(){
   if(!ONLINE||!ONLINE.started||!G||G.over)return;
   if(G.players[G.cur].me)return;
-  if(Date.now()-ONLINE.turnAt<46000)return;
+  if(Date.now()-ONLINE.turnAt<31000)return;
   ONLINE.turnAt=Date.now();
   AUTH.skipTurn(ONLINE.code).catch(()=>{});
 }
