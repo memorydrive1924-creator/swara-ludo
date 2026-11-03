@@ -417,6 +417,7 @@ async function joinVoice(code){
   const {data,error}=await sb.functions.invoke('livekit-token',{body:{room:code}});
   if(error)throw error;
   if(!data||!data.token)throw new Error(data&&data.error?data.error:'Token suara gagal');
+  if(!data.url)throw new Error('LIVEKIT_URL belum diisi di Supabase Secrets');
   const LK=await import('https://cdn.jsdelivr.net/npm/livekit-client@2.5.0/+esm');
   const room=new LK.Room({adaptiveStream:true,dynacast:true});
   room.on(LK.RoomEvent.TrackSubscribed,track=>{if(track.kind==='audio'){const el=track.attach();el.dataset.lk='1';document.body.appendChild(el);}});
@@ -1449,11 +1450,11 @@ function olNameVal(){
 }
 const GREET=["Selamat Datang Di Room Swara Ludo!", "Selamat datang, pejuang bidak! Siapkan dadumu.", "Hormat untuk tamu kehormatan! Mari bermain.", "Kandang sudah dibuka. Silakan masuk!", "Angin naga berhembus, selamat datang di Swara Ludo.", "Duduklah, teman. Dadu sudah menunggu.", "Siapa yang berani menantang Naga Swara hari ini?", "Jangan takut kalah, yang penting bersenang-senang!", "Selamat datang! Bidakmu sudah siap keluar kandang.", "Enam adalah angka keberuntunganmu. Semoga dapat!", "Ruangan ini milik kita semua. Nikmati permainannya!", "Hati-hati dengan Badai Es dan Sambaran Petir...", "Api naga menyambutmu. Jangan terbakar sebelum mulai!", "Selamat datang di rumah para pemberani.", "Ayo, lempar dadu dan buktikan keberuntunganmu!", "Yang menang akan dapat tepuk tangan dari naga.", "Kandang terbuka lebar. Masuk dan bersenang-senang!", "Ketawa itu boleh, curang itu... ketahuan!", "Selamat datang, sahabat Swara Ludo!", "Dari kandang sampai rumah, semua dilalui dengan gembira.", "Mari bermain sportif. Naga selalu melihat!", "Pelan-pelan, bidakmu tidak akan lari kok.", "Wahai pemain baru, kursimu sudah disiapkan.", "Bersiaplah, ruangan ini tidak pernah sepi.", "Selamat datang, semoga dadumu sering enam!", "Naga Swara senang kamu datang. Ayo mulai!", "Kumpulkan teman, lalu lempar dadu bersama!", "Ruang ini hangat seperti sisik naga. Nyaman, kan?", "Siapa cepat, dia yang sampai di rumah lebih dulu!", "Selamat datang di Swara Ludo. Semoga harimu menyenangkan!"];
 let _gi=0,_gt=null;
-function greetStart(){if(_gt)return;_gi=Math.floor(Math.random()*GREET.length);speakLine(GREET[_gi],.85);_gt=setInterval(()=>{const el=document.getElementById('greet');if(!el)return;_gi=(_gi+1)%GREET.length;el.textContent=GREET[_gi];speakLine(GREET[_gi],.85);},3500);}
+function greetStart(){if(_gt)return;_gi=Math.floor(Math.random()*GREET.length);speakLine(GREET[_gi],.85);_gt=setInterval(()=>{const el=document.getElementById('greet');if(!el)return;_gi=(_gi+1)%GREET.length;el.textContent=GREET[_gi];},3500);}
 function greetStop(){clearInterval(_gt);_gt=null;}
 function renderLobby(room){
   const me=window._uid;const isHost=room.host_id===me;
-  const list=(room.players||[]).slice().sort((a,b)=>a.seat-b.seat).map(p=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #3a2414;font-size:14px"><span>${esc(p.name)}${p.uid===me?' (kamu)':''}</span><span style="color:var(--dim)">${CHARS[p.char]?esc(CHARS[p.char].name):''}</span></div>`).join('');
+  const list=(room.players||[]).slice().sort((a,b)=>a.seat-b.seat).map(p=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #3a2414;font-size:14px"><span>${esc(p.name)}</span><span style="color:var(--dim)">${CHARS[p.char]?esc(CHARS[p.char].name):''}</span></div>`).join('');
   const started=room.status!=='lobby';
   ovEl.innerHTML=`<div class="ovin" style="max-width:460px;margin:auto">
     <h2 style="font-family:var(--display);color:var(--gold2);margin:4px 0">Lobi Room</h2>
