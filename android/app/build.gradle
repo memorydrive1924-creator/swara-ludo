@@ -1,0 +1,40 @@
+plugins { id 'com.android.application' }
+
+def ksPass = System.getenv('KEYSTORE_PASSWORD')
+
+android {
+    namespace 'com.swaracompany.swaraludo'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'com.swaracompany.swaraludo'
+        minSdk 21
+        targetSdk 35
+        versionCode((System.getenv('GITHUB_RUN_NUMBER') ?: '1').toInteger())
+        versionName '1.0.' + (System.getenv('GITHUB_RUN_NUMBER') ?: '0')
+    }
+    signingConfigs {
+        release {
+            if (ksPass) {
+                storeFile file('../swaraludo-release.keystore')
+                storePassword ksPass
+                keyAlias 'swaraludo'
+                keyPassword ksPass
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig ksPass ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    lint { abortOnError false; checkReleaseBuilds false }
+}
+
+dependencies {
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
+}
