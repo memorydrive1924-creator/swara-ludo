@@ -458,7 +458,7 @@ const LINES={senang:['Yes!','Mantap!','Asik!'],tertawa:['Hahaha!','Wkwkwk!','Hah
 const DARES=['Nyanyi 10 detik di voice chat','Puji pemenang 3 kali','Bicara pakai logat daerah sampai game berikutnya','Tirukan suara hewan bidakmu','Bilang "Kamu memang hebat" ke pemenang','Ceritakan pengalaman paling memalukan','Pakai foto profil lucu selama 1 jam','Biarkan pemenang memilih karaktermu di game berikutnya'];
 const BOTNAMES=['ratu_dadu','si_raja_ludo','kuda_liar77','dewi_bidak','panglima_enam','tukang_injak','mbak_hoki','bang_santuy','putri_kandang','jagoan_rumah'];
 const SHOP={
-  dice:[{id:'klasik',n:'Klasik',p:0,face:'linear-gradient(145deg,#fbf1e2,#e2cdb8)',pip:'#8a1517'},{id:'emas',n:'Emas',p:400,face:'linear-gradient(145deg,#fff1b0,#d9a43a 60%,#8a5a12)',pip:'#3a2006'},{id:'es',n:'Es',p:600,face:'linear-gradient(145deg,#eaf8ff,#8fd0f0 60%,#3a7aa0)',pip:'#0a3a5a'},{id:'darah',n:'Darah',p:800,face:'linear-gradient(145deg,#8a1a1a,#3a0606)',pip:'#ffd36b'}],
+  dice:[{id:'klasik',n:'Klasik',p:0,face:'#ffffff',pip:'#111111'},{id:'emas',n:'Emas',p:400,face:'linear-gradient(145deg,#fff1b0,#d9a43a 60%,#8a5a12)',pip:'#3a2006'},{id:'es',n:'Es',p:600,face:'linear-gradient(145deg,#eaf8ff,#8fd0f0 60%,#3a7aa0)',pip:'#0a3a5a'},{id:'darah',n:'Darah',p:800,face:'linear-gradient(145deg,#8a1a1a,#3a0606)',pip:'#ffd36b'}],
   frame:[{id:'none',n:'Tanpa bingkai',p:0},{id:'emas',n:'Bingkai Emas',p:300},{id:'api',n:'Bingkai Api',p:600}]
 };
 const LEGEND_PRICE=5000,FREECARD_PRICE=100,ATTACK_COST=120,ATTACK2_COST=200,GIFT_COST=30,STAKE=20;
@@ -485,9 +485,10 @@ function face(k,m){return ART[k+'_'+(m&&m!=='tenang'?m:'sangar')]||ART[k+'_sanga
 function piece(k){return ART['piece_'+k];}
 
 /* ================= profil dan simpanan ================= */
-const ST={coins:500,owned:[],legend:[],dice:'klasik',diceOwned:['klasik'],frame:'none',frameOwned:['none'],freeCards:0,username:'',photo:'',wins:0,streak:0,best:0,lastDaily:'',welcomed:false};
+const ST={coins:5000,owned:[],legend:[],dice:'klasik',diceOwned:['klasik'],frame:'none',frameOwned:['none'],freeCards:0,username:'',photo:'',wins:0,streak:0,best:0,lastDaily:'',welcomed:false};
 try{const s=JSON.parse(localStorage.getItem('swaraLudo4')||'null');if(s)Object.assign(ST,s);}catch(e){}
 function save(){try{localStorage.setItem('swaraLudo4',JSON.stringify(ST));}catch(e){}}
+if(!ST.start5k){ST.coins=Math.max(ST.coins||0,5000);ST.start5k=true;save();}
 const today=()=>new Date().toISOString().slice(0,10);
 function owns(k){return CHARS[k].price===0||ST.owned.includes(k);}
 function toast(t){const el=document.createElement('div');el.className='toast';el.textContent=t;document.body.appendChild(el);setTimeout(()=>el.remove(),2700);}
@@ -821,7 +822,7 @@ async function toggleMic(){
 function sendChat(){const inp=document.getElementById('chatIn');const txt=(inp.value||'').trim().slice(0,120);if(!txt||!G)return;inp.value='';
   showChatBubble(meP(),txt);
   if(ONLINE&&roomCh)roomCh.send({type:'broadcast',event:'chat',payload:{uid:ONLINE.uid,text:txt}});}
-function onChatRemote(p){if(!G||!p)return;const pl=G.players.find(q=>q.uid===p.uid);if(pl&&!pl.me)showChatBubble(pl,String(p.text||'').slice(0,120));}
+function onChatRemote(p){if(!G||!p)return;if(p.fx){const fm=G.players.find(q=>q.uid===p.uid);if(fm&&!fm.me&&PSEAT(p.fx.to))sendFx(fm,p.fx.to,p.fx.kind==='gift'?'gift':'attack',p.fx.el);return;}const pl=G.players.find(q=>q.uid===p.uid);if(pl&&!pl.me)showChatBubble(pl,String(p.text||'').slice(0,120));}
 function coinsOf(pl){return pl.me?ST.coins:pl.coins;}
 function addCoins(pl,n){
   if(pl.me){ST.coins=Math.max(0,ST.coins+n);save();updateCoins();if(n>0)sfx('coin');}else pl.coins=Math.max(0,pl.coins+n);
@@ -867,11 +868,11 @@ async function nextTurn(){if(G.over)return;G.deadline=0;G.cur=(G.cur+1)%G.player
   if(ONLINE){G.phase='wait';renderUI();placeTokens();await pushOnline(G.players[G.cur].uid);return;}
   startTurn();}
 function legal(pl,v){const m=[];pl.tokens.forEach((t,ti)=>{if(t.p<0){if(v===6)m.push({ti,to:0,out:true});}else if(t.p<FINAL&&t.p+v<=FINAL)m.push({ti,to:t.p+v});});return m;}
-function spinDie(v){const rot={1:[0,0],2:[0,-90],3:[0,180],4:[0,90],5:[-90,0],6:[90,0]}[v];G.spin++;const cube=document.getElementById('cube');if(cube)cube.style.transform=`rotateX(${rot[0]+G.spin*720}deg) rotateY(${rot[1]+G.spin*720+(G.spin%2?360:0)}deg)`;}
+function spinDie(v){sfx('dice');const rot={1:[0,0],2:[0,-90],3:[0,180],4:[0,90],5:[-90,0],6:[90,0]}[v];G.spin++;const cube=document.getElementById('cube');if(cube)cube.style.transform=`rotateX(${rot[0]+G.spin*720}deg) rotateY(${rot[1]+G.spin*720+(G.spin%2?360:0)}deg)`;}
 async function roll(pl,forced){
   if(G.busy||G.phase!=='roll'||G.over)return;
   G.busy=true;G.phase='rolling';G.deadline=0;renderUI();
-  const v=forced||(ONLINE&&pl.me?await rollOnline():d6());if(v==null){G.busy=false;G.phase='roll';renderUI();return;}G.dieVal=v;sfx('dice');spinDie(v);
+  const v=forced||(ONLINE&&pl.me?await rollOnline():d6());if(v==null){G.busy=false;G.phase='roll';renderUI();return;}G.dieVal=v;spinDie(v);
   await sleep(REDUCED?150:(pl.bot?750:1000));
   G.lastRoll=v;
   if(v===6&&pl.me)luckySay(pl.char);
@@ -1087,6 +1088,7 @@ function playerSend(toSeat,kind){
   me.lastSend=t;if(!me.owner)addCoins(me,-cost);
   if(kind==='gift'){to.coins+=cost;closeSheet();sendFx(me,toSeat,'gift');log(`Kamu memberi ${mv.n} ke ${to.uname}.`);}
   else{closeSheet();sendFx(me,toSeat,'attack',mv.fx);applyEffect(me,to,mv);}
+  if(ONLINE&&roomCh)roomCh.send({type:'broadcast',event:'chat',payload:{uid:ONLINE.uid,fx:{kind,to:toSeat,el:mv.fx}}});
   renderUI();
 }
 function botSend(b,toSeat,kind){
@@ -1291,6 +1293,8 @@ function showSettings(){
       <label for="volMus">Musik gamelan<input id="volMus" type="range" min="0" max="100" value="${Math.round(AU.music*100)}"></label>
       <label for="volSfx">Efek<input id="volSfx" type="range" min="0" max="100" value="${Math.round(AU.sfx*100)}"></label>
       <label for="volVoice">Suara karakter (aduh, tawa, tangis)<input id="volVoice" type="range" min="0" max="100" value="${Math.round(AU.voice*100)}"></label>
+      <div class="rowx"><span>Latar</span></div>
+      <div class="opts">${[['gelap','Gelap'],['terang','Terang']].map(([k,l])=>`<button class="opt${(ST.theme||'gelap')===k?' sel':''}" data-theme="${k}"><span>${l}</span></button>`).join('')}</div>
       <div class="rowx"><span>Karakter bicara</span></div>
       <div class="opts">${[['banyak','Banyak'],['sedikit','Sedikit'],['diam','Diam']].map(([k,l])=>`<button class="opt${(ST.talk||'sedikit')===k?' sel':''}" data-talk="${k}"><span>${l}</span></button>`).join('')}</div>
       <button class="ghost" id="testSfx">Tes suara karakter</button>
@@ -1379,7 +1383,7 @@ function startOnline(r){
   ONLINE.started=true;ONLINE.turnAt=Date.now();unlockAudio();
   setInterval(checkIdleTurn,5000);const gsx=GREET[Math.floor(Math.random()*GREET.length)];toast(gsx);speakLine(gsx,.85);
   const players=list.map((p,i)=>{const me=p.uid===ONLINE.uid;return {uid:p.uid,me,seat:seats[i],char:p.char,uname:me?myName():p.name,photo:me?ST.photo:'',color:SEATCOL[seats[i]].c,bot:false,owner:me&&p.char==='naga',
-    tokens:Array.from({length:4},()=>({p:-1})),sixes:0,mood:'tenang',moodUntil:0,coins:500,delta:0,caps:0,eaten:0,sixCount:0,lastSend:0};});
+    tokens:Array.from({length:4},()=>({p:-1})),sixes:0,mood:'tenang',moodUntil:0,coins:me?ST.coins:5000,delta:0,caps:0,eaten:0,sixCount:0,lastSend:0};});
   G={players,n:4,cur:Math.max(0,players.findIndex(p=>p.uid===r.turn_uid)),round:1,phase:'wait',moves:[],busy:false,log:'',over:false,ownerMode:false,noCoins:false,stake:false,dieVal:1,spin:0,breathUsed:false,lastRoll:0,timer:0,deadline:0,targetSeat:(players.find(p=>!p.me)||players[0]).seat};
   document.getElementById('ov').hidden=true;closeSheet();
   buildBoard();placeTokens();
@@ -1626,6 +1630,7 @@ ovEl.addEventListener('click',e=>{
   if(q('#dareFree')){ST.freeCards--;save();document.getElementById('dareBox').innerHTML='<h3>Bebas!</h3><p>Kartu Bebas Hukuman dipakai.</p>';sfx('buy');return;}
   if(q('#darePay')){if(ST.coins<50){toast('Koin tidak cukup');return;}ST.coins-=50;save();updateCoins();document.getElementById('dareBox').innerHTML='<h3>Bebas!</h3><p>Kamu membayar 50 koin.</p>';sfx('coin');return;}
   if(q('#setOn')){AU.on=!AU.on;applyVol();saveAudio();showSettings();renderUI();return;}
+  const th2=q('[data-theme]');if(th2){ST.theme=th2.dataset.theme;save();applyTheme();showSettings();return;}
   const tk2=q('[data-talk]');if(tk2){ST.talk=tk2.dataset.talk;save();showSettings();return;}
   if(q('#chatSend')){sendChat();return;}
   if(q('#testSfx')){window._tv=true;setTimeout(()=>window._tv=false,9000);const k=G?meP().char:SEL.char;['tertawa','kesakitan','sedih','mengejek','kaget','marah'].forEach((m,i)=>setTimeout(()=>vocal(m,k,true),i*1300));return;}
@@ -1642,7 +1647,7 @@ window.addEventListener('resize',()=>{FX.resize();placeTokens();});
 
 /* ================= mulai ================= */
 FX.init();
-if(!ST.welcomed){ST.welcomed=true;ST.lastDaily=today();save();setTimeout(()=>toast('Selamat datang! Kamu dapat 500 koin sambutan'),600);}
+if(!ST.welcomed){ST.welcomed=true;ST.lastDaily=today();save();setTimeout(()=>toast('Selamat datang! Kamu dapat 5000 koin sambutan'),600);}
 else if(ST.lastDaily!==today()){ST.lastDaily=today();ST.coins+=100;save();setTimeout(()=>toast('Bonus login harian +100 koin'),600);}
 renderUI();
 (async()=>{
@@ -1683,7 +1688,14 @@ body{padding-bottom:72px}
     syncChatBox=function(){_scb();const c=document.getElementById('chatBox');if(c&&c.hidden)box.hidden=true;};
     document.addEventListener('click',function once(){document.removeEventListener('click',once);
       try{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('portrait').catch(()=>{});}catch(_){}},{once:true});
-    const ci=document.getElementById('chatIn');
+    const st2=document.createElement('style');st2.textContent='body.light{color-scheme:light;background:#f7efe3;--ink:#f7efe3;--bone:#2b1d14;--dim:#6e5b4e;--gold2:#7a4f0a;--panel:#fffaf2;--rule:#d8c4ae}body.light .sub,body.light .hero p{color:#5a4538}body.light h1,body.light h2,body.light h3{color:#2b1d14}body.light .cell{background:#efe3d2;border-color:#c9b59c;color:#7a5a44}body.light .board{background:#f3e6d4}body.light .wrap{color:var(--bone)}body.light .chip,body.light .panel,body.light .strip,body.light details,body.light .set{background:#fffaf2;border-color:#d8c4ae;color:#2b1d14}body.light #chatBox input,body.light #chatLog{background:#fffaf2;color:#2b1d14}body.light #chatLog{background:rgba(255,250,242,.97)}body.light #chatLog b{color:#8a5a10}';document.head.appendChild(st2);
+  window.applyTheme=function(){document.body.classList.toggle('light',ST.theme==='terang');};
+  applyTheme();
+  const st3=document.createElement('style');st3.textContent='.chip{position:relative}.chip .cube{position:absolute;right:-8px;top:-14px;scale:.6;z-index:5;pointer-events:none}body.light .ov,body.light #ov{background:#f7efe3!important}body.light .ov *{color:#2b1d14}body.light .ov .ovin{color:#2b1d14}body.light .ov button{background:#f3e3c8!important;color:#4a2e0a!important;border-color:#b8893a!important}body.light .ov button.big{background:linear-gradient(180deg,#e0463c,#a52a22)!important;color:#fff!important}body.light .ov input{background:#fffaf2!important;color:#2b1d14!important;border-color:#c9b59c!important}';document.head.appendChild(st3);
+  window.moveDie=function(){const c=document.getElementById('cube');const now=document.querySelector('.chip.now');if(c&&now&&c.parentElement!==now)now.appendChild(c);};
+  const _ru=renderUI;renderUI=function(){_ru();try{moveDie();}catch(_){}};
+  document.addEventListener('pointerdown',function un(){document.removeEventListener('pointerdown',un);try{unlockAudio();}catch(_){}},{once:true});
+  const ci=document.getElementById('chatIn');
     if(ci){let saved=0;
       ci.addEventListener('focus',()=>{saved=window.scrollY;setTimeout(()=>window.scrollTo(0,saved),250);setTimeout(()=>window.scrollTo(0,saved),600);});
     }
