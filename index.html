@@ -1,4 +1,8 @@
 <title>Swara Ludo Prototype</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d0708">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1691,8 +1695,8 @@ body{padding-bottom:72px}
     const st2=document.createElement('style');st2.textContent='body.light{color-scheme:light;background:#f7efe3;--ink:#f7efe3;--bone:#2b1d14;--dim:#6e5b4e;--gold2:#7a4f0a;--panel:#fffaf2;--rule:#d8c4ae}body.light .sub,body.light .hero p{color:#5a4538}body.light h1,body.light h2,body.light h3{color:#2b1d14}body.light .cell{background:#efe3d2;border-color:#c9b59c;color:#7a5a44}body.light .board{background:#f3e6d4}body.light .wrap{color:var(--bone)}body.light .chip,body.light .panel,body.light .strip,body.light details,body.light .set{background:#fffaf2;border-color:#d8c4ae;color:#2b1d14}body.light #chatBox input,body.light #chatLog{background:#fffaf2;color:#2b1d14}body.light #chatLog{background:rgba(255,250,242,.97)}body.light #chatLog b{color:#8a5a10}';document.head.appendChild(st2);
   window.applyTheme=function(){document.body.classList.toggle('light',ST.theme==='terang');};
   applyTheme();
-  const st3=document.createElement('style');st3.textContent='.chip{position:relative}.chip .cube{position:absolute;right:-8px;top:-14px;scale:.6;z-index:5;pointer-events:none}body.light .ov,body.light #ov{background:#f7efe3!important}body.light .ov *{color:#2b1d14}body.light .ov .ovin{color:#2b1d14}body.light .ov button{background:#f3e3c8!important;color:#4a2e0a!important;border-color:#b8893a!important}body.light .ov button.big{background:linear-gradient(180deg,#e0463c,#a52a22)!important;color:#fff!important}body.light .ov input{background:#fffaf2!important;color:#2b1d14!important;border-color:#c9b59c!important}';document.head.appendChild(st3);
-  window.moveDie=function(){const c=document.getElementById('cube');const now=document.querySelector('.chip.now');if(c&&now&&c.parentElement!==now)now.appendChild(c);};
+  const st3=document.createElement('style');st3.textContent='.board{background:#fffaf0!important;border-color:#d9c3a5!important;box-shadow:0 22px 34px #0008,inset 0 0 0 1px #fff!important}#board .cell{background:#ffffff!important;border-color:#cdbfae!important;color:#b8860b!important}#board .cell.safe{color:#b8860b!important}.centerHome{filter:none}.chip{position:relative}.chip .cube{position:absolute;right:-8px;top:-14px;scale:.6;z-index:5;pointer-events:auto;cursor:pointer}#rollBtn{background:transparent!important;box-shadow:none!important;border-color:transparent!important}body.light .ov,body.light #ov{background:#f7efe3!important}body.light .ov *{color:#2b1d14}body.light .ov .ovin{color:#2b1d14}body.light .ov button{background:#f3e3c8!important;color:#4a2e0a!important;border-color:#b8893a!important}body.light .ov button.big{background:linear-gradient(180deg,#e0463c,#a52a22)!important;color:#fff!important}body.light .ov input{background:#fffaf2!important;color:#2b1d14!important;border-color:#c9b59c!important}';document.head.appendChild(st3);
+  window.moveDie=function(){const c=document.getElementById('cube');const now=document.querySelector('.chip.now');if(!c||!now)return;if(c.parentElement!==now)now.appendChild(c);c.style.pointerEvents='auto';c.onclick=(e)=>{e.stopPropagation();const rb=document.getElementById('rollBtn');if(rb&&!rb.disabled)rb.click();};};
   const _ru=renderUI;renderUI=function(){_ru();try{moveDie();}catch(_){}};
   document.addEventListener('pointerdown',function un(){document.removeEventListener('pointerdown',un);try{unlockAudio();}catch(_){}},{once:true});
   const ci=document.getElementById('chatIn');
