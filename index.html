@@ -1106,6 +1106,7 @@ function showPick(){
       <button class="opt${!SEL.stake?' sel':''}" data-stake="0"><span>Tanpa taruhan<small>Koin rumah dan injak tetap jalan</small></span></button></div>
     <button class="big" id="go">MAIN SEKARANG</button>
     <button class="ghost" id="shopOpen">Toko</button>
+    ${IS_OWNER?'<button class="ghost" id="admOpen">Izin Pemain (pemilik)</button>':''}
     <div class="note">${SEL.np} pemain · ${SEL.np-Math.min(SEL.humans,SEL.np)} bot. ${c.name} · ${ELEM[c.el].n}</div></div>`;
 }
 function readPhoto(file){
@@ -1177,6 +1178,51 @@ function showSettings(){
     <button class="big" id="closeSet">${G&&!G.over?'KEMBALI KE PERMAINAN':'TUTUP'}</button></div>`;
 }
 const ovEl=document.getElementById('ov');
+
+
+/* ================= panel izin pemain (pemilik) ================= */
+let admMsg='';
+async function showAdmin(){
+  if(!IS_OWNER){toast('Khusus pemilik');return;}
+  ovEl.hidden=false;
+  let rows=[];
+  try{rows=await AUTH.listGrants();}catch(e){admMsg='Gagal memuat daftar: '+(e.message||e);}
+  const fmt=t=>String(t).startsWith('infinity')?'Tanpa batas':new Date(t).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});
+  const inp='style="width:100%;height:44px;border-radius:12px;border:1px solid #7a5a20;background:#140a0c;color:#fff;padding:0 12px;font-size:15px;margin:6px 0"';
+  ovEl.innerHTML=`<div class="ovin" style="max-width:460px;margin:auto">
+    <h2 style="font-family:var(--display);color:var(--gold2);margin:4px 0">Izin Pemain</h2>
+    <p style="color:var(--dim);font-size:13px">Beri izin ke email yang sudah mendaftar. Setelah izin habis, pemain harus diberi izin lagi.</p>
+    <input id="admEmail" type="email" placeholder="email pemain" ${inp}>
+    <input id="admDays" type="number" min="1" max="3650" value="30" placeholder="masa aktif (hari)" ${inp}>
+    <div class="opts"><button class="big" id="admGrant">BERI IZIN</button><button class="ghost" id="admRevoke">CABUT IZIN</button></div>
+    <p id="admStatus" style="color:var(--gold2);font-size:13px;min-height:18px">${esc(admMsg)}</p>
+    <div class="lbl">PEMAIN BERIZIN</div>
+    <div style="max-height:260px;overflow:auto">${rows.length?rows.map(r=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #3a2414;font-size:13px"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis">${esc(r.email)}</span><span style="color:var(--dim);white-space:nowrap">${fmt(r.access_until)}</span></div>`).join(''):'<p style="color:var(--dim);font-size:13px">Belum ada pemain berizin.</p>'}</div>
+    <button class="ghost" id="admBack" style="width:100%;margin-top:10px">KEMBALI</button></div>`;
+  admMsg='';
+}
+ovEl.addEventListener('click',async e=>{
+  const id=e.target.id;
+  if(id==='admOpen'){showAdmin();return;}
+  if(id==='admBack'){showPick();return;}
+  if(id==='admGrant'||id==='admRevoke'){
+    const em=(document.getElementById('admEmail').value||'').trim();
+    const st=document.getElementById('admStatus');
+    if(!em){st.textContent='Isi email pemain dulu.';return;}
+    try{
+      let r;
+      if(id==='admGrant'){
+        const days=Math.max(1,Math.min(3650,parseInt(document.getElementById('admDays').value,10)||30));
+        r=await AUTH.grantAccess(em,days);
+      }else{
+        r=await AUTH.revokeAccess(em);
+      }
+      admMsg=r||'Selesai.';
+    }catch(err){admMsg='Gagal: '+(err.message||err);}
+    showAdmin();
+    return;
+  }
+});
 
 /* ================= login dan izin (Supabase) ================= */
 let lgEmail='';
