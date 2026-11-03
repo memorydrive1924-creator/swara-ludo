@@ -1,5 +1,5 @@
 <title>Swara Ludo Prototype</title>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Alegreya+Sans:wght@400;500;700;800&display=swap">
@@ -1451,7 +1451,7 @@ function olNameVal(){
 const GREET=["Selamat Datang Di Room Swara Ludo!", "Selamat datang, pejuang bidak! Siapkan dadumu.", "Hormat untuk tamu kehormatan! Mari bermain.", "Kandang sudah dibuka. Silakan masuk!", "Angin naga berhembus, selamat datang di Swara Ludo.", "Duduklah, teman. Dadu sudah menunggu.", "Siapa yang berani menantang Naga Swara hari ini?", "Jangan takut kalah, yang penting bersenang-senang!", "Selamat datang! Bidakmu sudah siap keluar kandang.", "Enam adalah angka keberuntunganmu. Semoga dapat!", "Ruangan ini milik kita semua. Nikmati permainannya!", "Hati-hati dengan Badai Es dan Sambaran Petir...", "Api naga menyambutmu. Jangan terbakar sebelum mulai!", "Selamat datang di rumah para pemberani.", "Ayo, lempar dadu dan buktikan keberuntunganmu!", "Yang menang akan dapat tepuk tangan dari naga.", "Kandang terbuka lebar. Masuk dan bersenang-senang!", "Ketawa itu boleh, curang itu... ketahuan!", "Selamat datang, sahabat Swara Ludo!", "Dari kandang sampai rumah, semua dilalui dengan gembira.", "Mari bermain sportif. Naga selalu melihat!", "Pelan-pelan, bidakmu tidak akan lari kok.", "Wahai pemain baru, kursimu sudah disiapkan.", "Bersiaplah, ruangan ini tidak pernah sepi.", "Selamat datang, semoga dadumu sering enam!", "Naga Swara senang kamu datang. Ayo mulai!", "Kumpulkan teman, lalu lempar dadu bersama!", "Ruang ini hangat seperti sisik naga. Nyaman, kan?", "Siapa cepat, dia yang sampai di rumah lebih dulu!", "Selamat datang di Swara Ludo. Semoga harimu menyenangkan!"];
 let _gi=0,_gt=null;
 let _gSpoke=null;
-function greetStart(){if(_gt)return;_gi=Math.floor(Math.random()*GREET.length);const gc=(ONLINE&&ONLINE.code)||'x';if(_gSpoke!==gc){_gSpoke=gc;speakLine(GREET[_gi],.85);}_gt=setInterval(()=>{const el=document.getElementById('greet');if(!el)return;_gi=(_gi+1)%GREET.length;el.textContent=GREET[_gi];},3500);}
+function greetStart(){if(_gt)return;_gi=Math.floor(Math.random()*GREET.length);const gc=(ONLINE&&ONLINE.code)||'x';if(_gSpoke!==gc){_gSpoke=gc;speakLine(GREET[_gi],.85);}_gt=1;}
 function greetStop(){clearInterval(_gt);_gt=null;}
 function renderLobby(room){
   const me=window._uid;const isHost=room.host_id===me;
@@ -1683,6 +1683,10 @@ body{padding-bottom:72px}
     syncChatBox=function(){_scb();const c=document.getElementById('chatBox');if(c&&c.hidden)box.hidden=true;};
     document.addEventListener('click',function once(){document.removeEventListener('click',once);
       try{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('portrait').catch(()=>{});}catch(_){}},{once:true});
+    const ci=document.getElementById('chatIn');
+    if(ci){let saved=0;
+      ci.addEventListener('focus',()=>{saved=window.scrollY;setTimeout(()=>window.scrollTo(0,saved),250);setTimeout(()=>window.scrollTo(0,saved),600);});
+    }
   }catch(err){console.warn('p5',err);}
 })();
 </script>
