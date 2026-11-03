@@ -1483,8 +1483,11 @@ ovEl.addEventListener('click',async e=>{
   const cb=document.createElement('div');cb.id='chatBox';cb.hidden=true;
   cb.innerHTML='<input id="chatIn" maxlength="120" placeholder="Ketik pesan..." autocomplete="off"><button id="chatSend">Kirim</button>';
   document.body.appendChild(cb);
+  const ovx=document.getElementById('ov');const syncChat=()=>{cb.hidden=!(G&&ovx.hidden);};
+  new MutationObserver(syncChat).observe(ovx,{attributes:true,attributeFilter:['hidden'],childList:true});
+  syncChat();
   const inp=cb.querySelector('#chatIn');inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendChat();}});
-  const st=document.createElement('style');st.textContent='#chatBox{position:fixed;left:8px;right:8px;bottom:8px;display:flex;gap:6px;z-index:60}#chatBox input{flex:1;min-width:0;height:42px;border-radius:12px;border:1px solid #7a5a20;background:#140a0c;color:#fff;padding:0 12px;font-size:16px}#chatBox button{height:42px;padding:0 14px;border-radius:12px;border:1px solid var(--gold);background:#2d1a10;color:var(--gold2);font-weight:800}';document.head.appendChild(st);
+  const st=document.createElement('style');st.textContent='#chatBox[hidden]{display:none!important}#chatBox{position:fixed;left:8px;right:8px;bottom:8px;display:flex;gap:6px;z-index:60}#chatBox input{flex:1;min-width:0;height:42px;border-radius:12px;border:1px solid #7a5a20;background:#140a0c;color:#fff;padding:0 12px;font-size:16px}#chatBox button{height:42px;padding:0 14px;border-radius:12px;border:1px solid var(--gold);background:#2d1a10;color:var(--gold2);font-weight:800}';document.head.appendChild(st);
 })();
 /* ================= login dan izin (Supabase) ================= */
 let lgEmail='';
