@@ -1129,7 +1129,7 @@ function botReact(mood){
 }
 setInterval(()=>{
   if(!G||G.over||G.players[G.cur].bot||!G.deadline)return;
-  const left=G.deadline-Date.now();const db=document.getElementById('rollBtn');const myT=ONLINE?G.players[G.cur].me:!G.players[G.cur].bot;if(db)db.style.setProperty('--t',myT?Math.max(0,left/150):0);
+  const left=G.deadline-Date.now();const db=document.getElementById('rollBtn');const myT=ONLINE?G.players[G.cur].me:!G.players[G.cur].bot;if(db)db.style.setProperty('--t',myT?Math.max(0,left/150):100);
   if(left<=0){G.deadline=0;const me=G.players[G.cur];
     if(G.phase==='roll'&&!G.busy){toast('Waktu habis, dadu dilempar otomatis');roll(me);}
     else if(G.phase==='choose'&&!G.busy){toast('Waktu habis, bidak jalan otomatis');move(me,botPick(me));}}
@@ -1170,7 +1170,7 @@ function renderUI(){
       <button class="godbtn" id="rage" ${G.busy||G.breathUsed?'disabled':''}>${G.breathUsed?'Amukan Naga sudah dipakai giliran ini':'AMUKAN NAGA: bakar bidak terdepan lawan'}</button>`:''}
     <div class="emotes">${MOODS.map(m=>`<button class="emo" data-emo="${m}" aria-label="${MLABEL[m]}"><span class="f" style="border-color:${me.color}"><img src="${face(me.char,m)}" alt=""></span>${MLABEL[m]}</button>`).join('')}</div>`;
   if(keep){const c=document.getElementById('cube');c.style.transition='none';c.style.transform=keep;void c.offsetWidth;c.style.transition='';}
-  const db=document.getElementById('rollBtn');if(db)db.style.setProperty('--t',(canRoll&&G.deadline)?Math.max(0,(G.deadline-Date.now())/150):0);
+  const db=document.getElementById('rollBtn');if(db)db.style.setProperty('--t',(canRoll&&G.deadline)?Math.max(0,(G.deadline-Date.now())/150):100);
 }
 
 /* ================= kirim (serangan / hadiah) ================= */
